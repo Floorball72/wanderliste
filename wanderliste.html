@@ -6,320 +6,333 @@
 <title>Wanderliste</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --ink:#0f0e0b;--ink-2:#2a2820;--ink-3:#4a4840;
-  --paper:#f7f4ee;--paper-2:#edeae2;--paper-3:#e2dfd6;
-  --line:#d4d0c6;--line-2:#c4c0b4;
-  --forest:#2d5a3d;--forest-l:#3d7a52;--forest-ll:#c8dece;--forest-pale:#eef4f0;
-  --gold-l:#c49a3c;--danger:#7a2d2d;--danger-pale:#f5e8e8;
-  --r:10px;--r-lg:16px;
-  --shadow-lg:0 8px 32px rgba(15,14,11,0.14);
-  --panel:380px;--hdr:58px;
+  --ink:#0f0e0b;--ink2:#2a2820;--ink3:#5a5850;
+  --paper:#f7f4ee;--paper2:#edeae2;--paper3:#e2dfd6;
+  --line:#d4d0c6;--line2:#bfbcb2;
+  --g:#2d5a3d;--gl:#3d7a52;--gll:#c8dece;--gp:#eef4f0;
+  --danger:#7a2d2d;--dangerp:#f5e8e8;
+  --hdr:56px;--panel:360px;--det:380px;
+  --shadow:0 4px 24px rgba(15,14,11,.12);
 }
 html,body{height:100%;overflow:hidden;font-family:'Instrument Sans',sans-serif;background:var(--paper);color:var(--ink)}
-::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:2px}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--line2);border-radius:2px}
 
 /* LOGIN */
-#login-screen{position:fixed;inset:0;z-index:9999;display:flex;align-items:stretch;background:var(--ink)}
-.ll{flex:1;position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:56px}
-.ll-bg{
-  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-family:'Playfair Display',serif;font-size:clamp(80px,14vw,180px);font-weight:700;
-  color:rgba(255,255,255,0.03);line-height:1;user-select:none;letter-spacing:-4px;white-space:nowrap;
-}
-.ll-content{position:relative;z-index:1}
-.ll-eye{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(200,222,206,0.55);margin-bottom:16px;font-weight:500}
-.ll-h{font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,56px);font-weight:400;color:#fff;line-height:1.1;letter-spacing:-1px;margin-bottom:12px}
+#login{position:fixed;inset:0;z-index:9999;display:flex}
+.ll{flex:1;background:var(--ink);position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:52px}
+.ll-bg{position:absolute;inset:0;font-family:'Playfair Display',serif;font-size:clamp(100px,16vw,220px);font-weight:700;color:rgba(255,255,255,0.025);line-height:.9;user-select:none;letter-spacing:-6px;display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.ll-c{position:relative}
+.ll-eye{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(168,200,180,.55);margin-bottom:14px;font-weight:500}
+.ll-h{font-family:'Playfair Display',serif;font-size:clamp(38px,5.5vw,60px);color:#fff;line-height:1.05;letter-spacing:-1.5px;margin-bottom:10px}
 .ll-h em{font-style:italic;color:#a8c8b4}
-.ll-sub{font-size:13px;color:rgba(255,255,255,0.35);font-weight:300;line-height:1.65;max-width:300px}
-.ll-div{width:40px;height:1px;background:rgba(255,255,255,0.15);margin:22px 0}
-.lr{width:420px;flex-shrink:0;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 48px}
-.lr-mtico{width:44px;height:44px;margin-bottom:28px;align-self:flex-start;opacity:0.6}
-.lr-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:500;color:var(--ink);margin-bottom:5px;letter-spacing:-0.3px;align-self:flex-start}
-.lr-sub{font-size:12px;color:var(--ink-3);margin-bottom:30px;align-self:flex-start}
-.lf{width:100%}
-.lbl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;color:var(--ink-3);margin-bottom:6px;display:block}
-.linput{
-  width:100%;padding:13px 16px;border:1px solid var(--line);background:#fff;
-  border-radius:8px;font-size:14px;font-family:'Instrument Sans',sans-serif;color:var(--ink);
-  outline:none;transition:border-color 0.2s,box-shadow 0.2s;margin-bottom:13px;
-}
-.linput:focus{border-color:var(--forest-l);box-shadow:0 0 0 3px rgba(61,122,82,0.12)}
-.lbtn{
-  width:100%;padding:14px;background:var(--forest);color:#fff;border:none;border-radius:8px;
-  font-size:13px;font-weight:600;letter-spacing:0.3px;font-family:'Instrument Sans',sans-serif;
-  cursor:pointer;transition:background 0.2s;margin-top:4px;
-}
-.lbtn:hover{background:var(--forest-l)}
-.lbtn:active{transform:scale(0.99)}
-.lerr{font-size:12px;color:var(--danger);margin-top:10px;min-height:16px;text-align:center}
-.lnote{font-size:11px;color:var(--ink-3);margin-top:24px;text-align:center;opacity:0.7;line-height:1.55}
+.ll-hr{width:36px;height:1px;background:rgba(255,255,255,.15);margin:20px 0}
+.ll-s{font-size:13px;color:rgba(255,255,255,.3);line-height:1.65;max-width:280px;font-weight:300}
+.lr{width:400px;flex-shrink:0;background:var(--paper);display:flex;flex-direction:column;justify-content:center;padding:52px 44px}
+.lr-ico{width:40px;height:40px;margin-bottom:24px;opacity:.55}
+.lr-t{font-family:'Playfair Display',serif;font-size:24px;color:var(--ink);margin-bottom:4px;letter-spacing:-.3px}
+.lr-s{font-size:12px;color:var(--ink3);margin-bottom:28px}
+.lbl{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;font-weight:600;color:var(--ink3);margin-bottom:6px;display:block}
+.linp{width:100%;padding:12px 14px;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:14px;font-family:'Instrument Sans',sans-serif;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s;margin-bottom:12px}
+.linp:focus{border-color:var(--gl);box-shadow:0 0 0 3px rgba(61,122,82,.1)}
+.lbtn{width:100%;padding:13px;background:var(--g);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;letter-spacing:.3px;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:background .2s;margin-top:4px}
+.lbtn:hover{background:var(--gl)}
+.lerr{font-size:12px;color:var(--danger);margin-top:8px;min-height:16px;text-align:center}
+.lnote{font-size:11px;color:var(--ink3);margin-top:22px;text-align:center;opacity:.65;line-height:1.55}
 
 /* APP */
 #app{display:none;height:100vh;flex-direction:column}
 
 /* HEADER */
-header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;padding:0 20px;gap:0;flex-shrink:0;position:relative;z-index:500}
-.logo{font-family:'Playfair Display',serif;font-size:20px;color:#fff;letter-spacing:-0.3px;white-space:nowrap;padding-right:24px;border-right:1px solid rgba(255,255,255,0.1);margin-right:20px}
+header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;padding:0 18px;flex-shrink:0;z-index:500;gap:0}
+.logo{font-family:'Playfair Display',serif;font-size:19px;color:#fff;letter-spacing:-.3px;padding-right:20px;border-right:1px solid rgba(255,255,255,.1);margin-right:16px;white-space:nowrap}
 .logo em{font-style:italic;color:#a8c8b4}
-.hnav{display:flex;gap:2px}
-.nbtn{
-  display:flex;align-items:center;gap:8px;padding:7px 16px;border-radius:6px;border:none;
-  background:transparent;color:rgba(255,255,255,0.45);font-size:12px;
-  font-family:'Instrument Sans',sans-serif;font-weight:500;cursor:pointer;transition:all 0.15s;letter-spacing:0.2px;
-}
-.nbtn:hover{color:rgba(255,255,255,0.8);background:rgba(255,255,255,0.06)}
-.nbtn.active{color:#fff;background:rgba(255,255,255,0.1)}
-.nbtn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0;stroke-linecap:round;stroke-linejoin:round}
-.hright{margin-left:auto;display:flex;align-items:center;gap:10px}
-.loc-btn{width:32px;height:32px;border-radius:6px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
-.loc-btn:hover{background:rgba(255,255,255,0.12)}
-.loc-btn svg{width:15px;height:15px;stroke:rgba(255,255,255,0.6);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.upill{display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;border-radius:24px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);cursor:pointer;transition:all 0.15s}
-.upill:hover{border-color:rgba(255,255,255,0.2)}
-.av{width:26px;height:26px;border-radius:50%;background:var(--forest-l);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
-.uname{font-size:12px;color:rgba(255,255,255,0.7);font-weight:500}
+.hnav{display:flex;gap:1px}
+.nb{display:flex;align-items:center;gap:7px;padding:7px 14px;border-radius:6px;border:none;background:transparent;color:rgba(255,255,255,.42);font-size:12px;font-family:'Instrument Sans',sans-serif;font-weight:500;cursor:pointer;transition:all .15s;letter-spacing:.2px}
+.nb:hover{color:rgba(255,255,255,.78);background:rgba(255,255,255,.06)}
+.nb.on{color:#fff;background:rgba(255,255,255,.1)}
+.nb svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0;stroke-linecap:round;stroke-linejoin:round}
+.hr{margin-left:auto;display:flex;align-items:center;gap:9px}
+.locbtn{width:30px;height:30px;border-radius:6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.locbtn:hover{background:rgba(255,255,255,.12)}
+.locbtn svg{width:14px;height:14px;stroke:rgba(255,255,255,.55);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.upill{display:flex;align-items:center;gap:8px;padding:5px 11px 5px 5px;border-radius:24px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);cursor:pointer;transition:all .15s}
+.upill:hover{border-color:rgba(255,255,255,.2)}
+.av{width:24px;height:24px;border-radius:50%;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
+.uname{font-size:12px;color:rgba(255,255,255,.65);font-weight:500}
 
 /* VIEWS */
-.view{display:none;flex:1;overflow:hidden;animation:vi 0.25s ease}
-.view.active{display:flex}
-@keyframes vi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.view{display:none;flex:1;overflow:hidden}
+.view.on{display:flex;animation:vi .2s ease}
+@keyframes vi{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
 
-/* MAP VIEW */
+/* MAP */
 #map-view{flex-direction:row}
 #map{flex:1;z-index:0}
 .leaflet-control-attribution{display:none}
 
+/* Stamen Toner style = monochrome map tiles */
+
 /* SIDE PANEL */
 .sp{width:var(--panel);background:var(--paper);border-left:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
-.sp-hd{padding:18px 18px 12px;border-bottom:1px solid var(--line);flex-shrink:0}
-.sp-top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.sp-title{font-family:'Playfair Display',serif;font-size:17px;color:var(--ink);flex:1}
-.sp-cnt{font-size:11px;background:var(--forest);color:#fff;padding:3px 8px;border-radius:12px;font-weight:600;letter-spacing:0.3px}
-.sw{position:relative}
-.swico{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--ink-3);fill:none;stroke-width:1.8;stroke-linecap:round}
-.sinput{width:100%;padding:9px 12px 9px 32px;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:12px;font-family:'Instrument Sans',sans-serif;color:var(--ink);outline:none;transition:all 0.2s}
-.sinput:focus{border-color:var(--forest-l);box-shadow:0 0 0 3px rgba(61,122,82,0.1)}
-.frow{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap}
-.fc{padding:4px 10px;border-radius:20px;border:1px solid var(--line);font-size:11px;cursor:pointer;transition:all 0.15s;background:transparent;color:var(--ink-3);font-family:'Instrument Sans',sans-serif;font-weight:500}
-.fc:hover{border-color:var(--forest-l);color:var(--forest)}
-.fc.on{background:var(--forest);color:#fff;border-color:var(--forest)}
-.hlist{flex:1;overflow-y:auto;padding:8px}
-.hi{padding:12px 14px;border-radius:10px;cursor:pointer;transition:all 0.15s;border:1px solid transparent;margin-bottom:3px}
-.hi:hover{background:var(--paper-2);border-color:var(--line)}
-.hi.done{background:var(--forest-pale);border-color:var(--forest-ll)}
-.hi-r1{display:flex;align-items:flex-start;gap:10px;margin-bottom:4px}
+.sp-hd{padding:16px 16px 10px;border-bottom:1px solid var(--line);flex-shrink:0}
+.sp-top{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.sp-title{font-family:'Playfair Display',serif;font-size:16px;color:var(--ink);flex:1}
+.sp-cnt{font-size:10px;background:var(--g);color:#fff;padding:2px 8px;border-radius:10px;font-weight:600;letter-spacing:.3px}
+.add-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;background:var(--gp);border:1px solid var(--gll);color:var(--g);font-size:11px;font-weight:600;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:all .15s;letter-spacing:.2px}
+.add-btn:hover{background:var(--gll)}
+.add-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
+.sw{position:relative;margin-bottom:8px}
+.swico{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:13px;height:13px;stroke:var(--ink3);fill:none;stroke-width:1.8;stroke-linecap:round}
+.sinp{width:100%;padding:8px 11px 8px 29px;border:1px solid var(--line);background:#fff;border-radius:7px;font-size:12px;font-family:'Instrument Sans',sans-serif;color:var(--ink);outline:none;transition:all .2s}
+.sinp:focus{border-color:var(--gl);box-shadow:0 0 0 2px rgba(61,122,82,.1)}
+.frow{display:flex;gap:4px;flex-wrap:wrap}
+.fc{padding:3px 9px;border-radius:20px;border:1px solid var(--line);font-size:11px;cursor:pointer;transition:all .15s;background:transparent;color:var(--ink3);font-family:'Instrument Sans',sans-serif;font-weight:500}
+.fc:hover{border-color:var(--gl);color:var(--g)}
+.fc.on{background:var(--g);color:#fff;border-color:var(--g)}
+.hlist{flex:1;overflow-y:auto;padding:6px}
+.hi{padding:11px 13px;border-radius:9px;cursor:pointer;transition:all .15s;border:1px solid transparent;margin-bottom:2px;position:relative}
+.hi:hover{background:var(--paper2);border-color:var(--line)}
+.hi.done{background:var(--gp);border-color:var(--gll)}
+.hi-r1{display:flex;align-items:flex-start;gap:8px;margin-bottom:3px}
 .hi-nm{font-size:13px;font-weight:500;flex:1;color:var(--ink);line-height:1.2}
-.hi.done .hi-nm{color:var(--forest)}
-.hi-tick{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line-2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.25s;margin-top:1px}
-.hi.done .hi-tick{background:var(--forest);border-color:var(--forest)}
+.hi.done .hi-nm{color:var(--g)}
+.hi-tick{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px}
+.hi.done .hi-tick{background:var(--g);border-color:var(--g)}
 .hi-tick svg{display:none}
 .hi.done .hi-tick svg{display:block}
-.hi-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-.hi-elev,.hi-can{font-size:11px;color:var(--ink-3)}
-.db{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;letter-spacing:0.2px}
+.hi-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.hi-elev,.hi-can{font-size:11px;color:var(--ink3)}
+.hi-custom{font-size:10px;color:var(--g);font-weight:600;letter-spacing:.3px}
+.db{padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;letter-spacing:.1px}
 .db-easy{background:#d4edd9;color:#1e6630}
 .db-medium{background:#fdefd3;color:#7a5a10}
 .db-hard{background:#fdddd3;color:#7a3010}
 .db-expert{background:#ead3f0;color:#5a1080}
 
-/* DETAIL */
+/* DETAIL PANEL */
 #det{
   position:absolute;right:var(--panel);top:var(--hdr);bottom:0;
-  width:360px;background:var(--paper);border-left:1px solid var(--line);
+  width:var(--det);background:var(--paper);border-left:1px solid var(--line);
   z-index:200;overflow-y:auto;display:none;flex-direction:column;
-  box-shadow:-8px 0 32px rgba(15,14,11,0.1);
+  box-shadow:-6px 0 24px rgba(15,14,11,.08);
 }
-#det.open{display:flex}
-.dh{height:200px;background:var(--ink-2);position:relative;overflow:hidden;flex-shrink:0}
-.dh-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:linear-gradient(160deg,#2a2820 0%,#4a4840 100%)}
-.dh-ph svg{width:48px;height:48px;stroke:rgba(255,255,255,0.18);fill:none;stroke-width:1}
-.dh-ph span{font-size:11px;color:rgba(255,255,255,0.28);letter-spacing:0.5px}
-.dh img{width:100%;height:100%;object-fit:cover}
-.dh-grad{position:absolute;inset:0;background:linear-gradient(to top,rgba(15,14,11,0.72) 0%,transparent 60%)}
-.dh-x{position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:50%;background:rgba(15,14,11,0.5);backdrop-filter:blur(8px);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s}
-.dh-x:hover{background:rgba(15,14,11,0.7)}
-.dh-x svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round}
-.dh-ov{position:absolute;bottom:0;left:0;right:0;padding:16px 20px}
-.dh-nm{font-family:'Playfair Display',serif;font-size:22px;color:#fff;font-weight:500;letter-spacing:-0.3px;line-height:1.1;margin-bottom:3px}
-.dh-loc{font-size:11px;color:rgba(255,255,255,0.58);letter-spacing:0.3px}
-.db-body{padding:20px;flex:1}
-.dstats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px}
-.dsb{background:var(--paper-2);border:1px solid var(--line);border-radius:10px;padding:12px 10px;text-align:center}
-.dsb-v{font-family:'Playfair Display',serif;font-size:20px;color:var(--ink);line-height:1}
-.dsb-l{font-size:10px;color:var(--ink-3);margin-top:4px;letter-spacing:0.3px}
-.ddesc{font-size:13px;color:var(--ink-3);line-height:1.65;margin-bottom:18px;font-weight:300}
-.sh{font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:600;color:var(--ink-3);margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.sh::after{content:'';flex:1;height:1px;background:var(--line)}
-.dactions{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
-.bp{padding:12px;border-radius:9px;border:none;background:var(--forest);color:#fff;font-size:13px;font-weight:500;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:background 0.2s;letter-spacing:0.2px}
-.bp:hover{background:var(--forest-l)}
-.bs{padding:12px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:13px;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:all 0.15s}
-.bs:hover{background:var(--paper-2)}
-.bd{padding:12px;border-radius:9px;border:1px solid rgba(122,45,45,0.3);background:transparent;color:var(--danger);font-size:13px;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:all 0.15s}
-.bd:hover{background:var(--danger-pale)}
-.ri{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:9px;background:var(--paper-2);border:1px solid var(--line);font-size:12px;color:var(--ink-2);margin-bottom:6px}
-.rdot{width:6px;height:6px;border-radius:50%;background:var(--forest-l);flex-shrink:0}
-.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px}
-.mthumb{aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--paper-3);cursor:pointer}
-.mthumb img,.mthumb video{width:100%;height:100%;object-fit:cover}
-.upz{border:1.5px dashed var(--line-2);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all 0.2s}
-.upz:hover{border-color:var(--forest-l);background:var(--forest-pale)}
-.upz input{display:none}
-.upz svg{width:28px;height:28px;stroke:var(--ink-3);fill:none;stroke-width:1.5;margin-bottom:8px}
-.upt{font-size:12px;color:var(--ink-3)}
+#det.on{display:flex}
+.dh{height:190px;background:var(--ink2);position:relative;overflow:hidden;flex-shrink:0}
+.dh-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:linear-gradient(160deg,#1a1a18,#3a3830)}
+.dh-ph svg{width:44px;height:44px;stroke:rgba(255,255,255,.14);fill:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round}
+.dh-ph span{font-size:11px;color:rgba(255,255,255,.25);letter-spacing:.3px}
+.dh-grad{position:absolute;inset:0;background:linear-gradient(to top,rgba(15,14,11,.75) 0%,transparent 55%)}
+.dh-x{position:absolute;top:11px;right:11px;width:28px;height:28px;border-radius:50%;background:rgba(15,14,11,.5);backdrop-filter:blur(8px);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.dh-x:hover{background:rgba(15,14,11,.7)}
+.dh-x svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round}
+.dh-ov{position:absolute;bottom:0;left:0;right:0;padding:14px 18px}
+.dh-nm{font-family:'Playfair Display',serif;font-size:21px;color:#fff;font-weight:500;letter-spacing:-.3px;line-height:1.1;margin-bottom:2px}
+.dh-loc{font-size:11px;color:rgba(255,255,255,.52);letter-spacing:.2px}
+.dbody{padding:18px;flex:1}
 
-/* STATS */
-#stats-view{flex-direction:column;overflow-y:auto;background:var(--paper)}
-.si{max-width:960px;width:100%;margin:0 auto;padding:36px}
-.shero{background:var(--ink);border-radius:20px;padding:36px;margin-bottom:28px;position:relative;overflow:hidden}
-.shero-bg{position:absolute;right:-20px;top:-20px;font-family:'Playfair Display',serif;font-size:180px;font-weight:700;color:rgba(255,255,255,0.03);line-height:1;user-select:none;letter-spacing:-6px}
-.shero-eye{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(200,222,206,0.55);margin-bottom:12px;font-weight:500}
-.shero-t{font-family:'Playfair Display',serif;font-size:36px;color:#fff;font-weight:400;letter-spacing:-0.5px;margin-bottom:24px}
-.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;position:relative}
-.sg-s{border-top:1px solid rgba(255,255,255,0.12);padding-top:16px}
-.sg-v{font-family:'Playfair Display',serif;font-size:36px;color:#fff;line-height:1}
-.sg-l{font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;letter-spacing:0.3px}
-.sg2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
-.sc{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px}
-.sc-t{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:18px;letter-spacing:0.2px}
-.br{display:flex;align-items:center;gap:10px;margin-bottom:9px}
-.blbl{font-size:11px;color:var(--ink-3);width:72px;text-align:right;flex-shrink:0}
-.btrack{flex:1;height:6px;background:var(--paper-3);border-radius:3px;overflow:hidden}
-.bfill{height:100%;background:var(--forest);border-radius:3px;transition:width 0.8s cubic-bezier(.16,1,.3,1)}
-.bn{font-size:11px;color:var(--ink-3);width:16px;text-align:right}
-.lc{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px}
-.le{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}
+/* Stats row */
+.dstats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px}
+.dsb{background:var(--paper2);border:1px solid var(--line);border-radius:9px;padding:10px 8px;text-align:center}
+.dsb-v{font-family:'Playfair Display',serif;font-size:18px;color:var(--ink);line-height:1}
+.dsb-l{font-size:9px;color:var(--ink3);margin-top:3px;letter-spacing:.2px;text-transform:uppercase}
+
+/* Section heads */
+.sh{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600;color:var(--ink3);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.sh::after{content:'';flex:1;height:1px;background:var(--line)}
+
+/* Info boxes */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px}
+.info-box{background:#fff;border:1px solid var(--line);border-radius:9px;padding:11px 13px}
+.info-box.full{grid-column:1/-1}
+.info-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;color:var(--ink3);margin-bottom:5px;display:flex;align-items:center;gap:5px}
+.info-lbl svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.info-val{font-size:12px;color:var(--ink2);line-height:1.5;font-weight:400}
+.ext-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--g);font-weight:500;text-decoration:none;margin-top:6px}
+.ext-link:hover{text-decoration:underline}
+.ext-link svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* Actions */
+.dactions{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+.bp{padding:11px;border-radius:8px;border:none;background:var(--g);color:#fff;font-size:12px;font-weight:500;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:background .2s;letter-spacing:.2px}
+.bp:hover{background:var(--gl)}
+.bd{padding:11px;border-radius:8px;border:1px solid rgba(122,45,45,.3);background:transparent;color:var(--danger);font-size:12px;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:all .15s}
+.bd:hover{background:var(--dangerp)}
+
+/* Media */
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:12px}
+.mth{aspect-ratio:1;border-radius:7px;overflow:hidden;background:var(--paper3);cursor:pointer}
+.mth img,.mth video{width:100%;height:100%;object-fit:cover}
+.upz{border:1.5px dashed var(--line2);border-radius:9px;padding:18px;text-align:center;cursor:pointer;transition:all .2s}
+.upz:hover{border-color:var(--gl);background:var(--gp)}
+.upz input{display:none}
+.upz svg{width:24px;height:24px;stroke:var(--ink3);fill:none;stroke-width:1.5;margin-bottom:6px}
+.upz-t{font-size:11px;color:var(--ink3)}
+
+/* STATS VIEW */
+#stats-view{flex-direction:column;overflow-y:auto;background:var(--paper2)}
+.si{max-width:900px;width:100%;margin:0 auto;padding:32px}
+.shero{background:var(--ink);border-radius:18px;padding:32px;margin-bottom:24px;position:relative;overflow:hidden}
+.shero-bg{position:absolute;right:-10px;top:-10px;font-family:'Playfair Display',serif;font-size:160px;font-weight:700;color:rgba(255,255,255,.028);line-height:1;user-select:none;letter-spacing:-5px}
+.shero-eye{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(200,222,206,.5);margin-bottom:10px;font-weight:500}
+.shero-t{font-family:'Playfair Display',serif;font-size:32px;color:#fff;font-weight:400;letter-spacing:-.5px;margin-bottom:22px}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;position:relative}
+.sg-s{border-top:1px solid rgba(255,255,255,.12);padding-top:14px}
+.sg-v{font-family:'Playfair Display',serif;font-size:34px;color:#fff;line-height:1}
+.sg-l{font-size:10px;color:rgba(255,255,255,.38);margin-top:4px;letter-spacing:.3px;text-transform:uppercase}
+.sg2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.sc{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px}
+.sc-t{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:16px;letter-spacing:.1px}
+.br{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+.blbl{font-size:11px;color:var(--ink3);width:68px;text-align:right;flex-shrink:0}
+.btrack{flex:1;height:5px;background:var(--paper3);border-radius:3px;overflow:hidden}
+.bfill{height:100%;background:var(--g);border-radius:3px;transition:width .8s cubic-bezier(.16,1,.3,1)}
+.bn{font-size:11px;color:var(--ink3);width:14px;text-align:right}
+.lc{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px}
+.le{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
 .le:last-child{border-bottom:none}
-.le-n{font-family:'Playfair Display',serif;font-size:14px;color:var(--line-2);width:20px;text-align:right;flex-shrink:0;font-style:italic}
+.le-n{font-family:'Playfair Display',serif;font-size:13px;color:var(--line2);width:18px;text-align:right;flex-shrink:0;font-style:italic}
 .le-nm{font-size:13px;font-weight:500;flex:1;color:var(--ink)}
-.le-el{font-size:12px;color:var(--forest);font-weight:600}
-.le-dt{font-size:11px;color:var(--ink-3)}
+.le-el{font-size:11px;color:var(--g);font-weight:600}
+.le-dt{font-size:10px;color:var(--ink3)}
 
 /* SETTINGS */
-#settings-view{flex-direction:column;overflow-y:auto;background:var(--paper-2);align-items:center;padding:36px 24px}
-.setc{background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px;max-width:540px;width:100%;margin-bottom:16px}
-.set-t{font-family:'Playfair Display',serif;font-size:18px;color:var(--ink);margin-bottom:4px;letter-spacing:-0.2px}
-.set-s{font-size:12px;color:var(--ink-3);margin-bottom:22px;padding-bottom:20px;border-bottom:1px solid var(--line)}
-.fl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;color:var(--ink-3);margin-bottom:7px;display:block}
-.fi{width:100%;padding:11px 14px;border:1px solid var(--line);background:var(--paper-2);border-radius:8px;font-size:13px;font-family:'Instrument Sans',sans-serif;color:var(--ink);outline:none;transition:all 0.2s;margin-bottom:14px}
-.fi:focus{border-color:var(--forest-l);box-shadow:0 0 0 3px rgba(61,122,82,0.1)}
-.fi:disabled{opacity:0.5;cursor:not-allowed}
-.ssave{padding:11px 28px;background:var(--forest);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:background 0.15s;letter-spacing:0.2px}
-.ssave:hover{background:var(--forest-l)}
-.crow{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
-.csw{width:34px;height:34px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.15)}
-.csw:hover{transform:scale(1.12)}
-.csw.sel{transform:scale(1.12);outline:2px solid var(--ink);outline-offset:2px}
-.slo{padding:11px 24px;background:transparent;color:var(--danger);border:1px solid rgba(122,45,45,0.3);border-radius:8px;font-size:13px;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:all 0.15s}
-.slo:hover{background:var(--danger-pale)}
+#settings-view{flex-direction:column;overflow-y:auto;background:var(--paper2);align-items:center;padding:32px 24px}
+.setc{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px;max-width:520px;width:100%;margin-bottom:14px}
+.set-t{font-family:'Playfair Display',serif;font-size:17px;color:var(--ink);margin-bottom:4px}
+.set-s{font-size:12px;color:var(--ink3);margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.fl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;color:var(--ink3);margin-bottom:6px;display:block}
+.fi{width:100%;padding:10px 13px;border:1px solid var(--line);background:var(--paper2);border-radius:7px;font-size:13px;font-family:'Instrument Sans',sans-serif;color:var(--ink);outline:none;transition:all .2s;margin-bottom:13px}
+.fi:focus{border-color:var(--gl);box-shadow:0 0 0 2px rgba(61,122,82,.1)}
+.fi:disabled{opacity:.5;cursor:not-allowed}
+.ssave{padding:10px 26px;background:var(--g);color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:500;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:background .15s}
+.ssave:hover{background:var(--gl)}
+.crow{display:flex;gap:9px;flex-wrap:wrap;margin-top:4px}
+.csw{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.csw:hover{transform:scale(1.1)}
+.csw.sel{transform:scale(1.1);outline:2px solid var(--ink);outline-offset:2px}
+.slo{padding:10px 22px;background:transparent;color:var(--danger);border:1px solid rgba(122,45,45,.3);border-radius:7px;font-size:13px;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:all .15s}
+.slo:hover{background:var(--dangerp)}
 
-/* MODAL */
-.mbg{position:fixed;inset:0;background:rgba(15,14,11,0.6);backdrop-filter:blur(4px);z-index:800;display:none;align-items:center;justify-content:center}
-.mbg.open{display:flex}
-.modal{background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px;width:400px;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:min 0.25s cubic-bezier(.16,1,.3,1)}
-@keyframes min{from{opacity:0;transform:scale(0.96) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
-.mt{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:5px;letter-spacing:-0.2px}
-.ms{font-size:12px;color:var(--ink-3);margin-bottom:20px}
-.srow{display:flex;gap:6px;margin-bottom:4px}
-.star{font-size:26px;cursor:pointer;transition:transform 0.1s;color:var(--line-2);user-select:none}
-.star.lit{color:var(--gold-l)}
+/* MODALS */
+.mbg{position:fixed;inset:0;background:rgba(15,14,11,.55);backdrop-filter:blur(4px);z-index:800;display:none;align-items:center;justify-content:center}
+.mbg.on{display:flex}
+.modal{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px;width:440px;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow);animation:mi .22s cubic-bezier(.16,1,.3,1)}
+.modal.wide{width:560px}
+@keyframes mi{from{opacity:0;transform:scale(.97) translateY(6px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.mt{font-family:'Playfair Display',serif;font-size:19px;margin-bottom:4px;letter-spacing:-.2px}
+.ms{font-size:12px;color:var(--ink3);margin-bottom:20px}
+.srow{display:flex;gap:5px;margin-bottom:4px}
+.star{font-size:24px;cursor:pointer;transition:transform .1s;color:var(--line2);user-select:none}
+.star.lit{color:#c49a3c}
 .star:hover{transform:scale(1.15)}
-.mfoot{display:flex;gap:8px;justify-content:flex-end;margin-top:22px}
-.mcan{padding:10px 20px;border:1px solid var(--line);background:transparent;border-radius:8px;font-size:13px;cursor:pointer;font-family:'Instrument Sans',sans-serif;color:var(--ink-2);transition:background 0.15s}
-.mcan:hover{background:var(--paper-2)}
-.mok{padding:10px 24px;background:var(--forest);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:background 0.15s}
-.mok:hover{background:var(--forest-l)}
+.mfoot{display:flex;gap:7px;justify-content:flex-end;margin-top:20px}
+.mcan{padding:9px 18px;border:1px solid var(--line);background:transparent;border-radius:7px;font-size:13px;cursor:pointer;font-family:'Instrument Sans',sans-serif;color:var(--ink2);transition:background .15s}
+.mcan:hover{background:var(--paper2)}
+.mok{padding:9px 22px;background:var(--g);color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:500;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:background .15s}
+.mok:hover{background:var(--gl)}
 
-/* MAP MARKERS */
-.mpin{width:22px;height:22px;border-radius:50%;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
-.leaflet-popup-content-wrapper{border-radius:12px;box-shadow:0 4px 24px rgba(15,14,11,0.2);border:1px solid var(--line);padding:0;overflow:hidden}
+/* Form grid inside modal */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-grid .full{grid-column:1/-1}
+.form-sel{width:100%;padding:10px 13px;border:1px solid var(--line);background:var(--paper2);border-radius:7px;font-size:13px;font-family:'Instrument Sans',sans-serif;color:var(--ink);outline:none;margin-bottom:13px;transition:all .2s}
+.form-sel:focus{border-color:var(--gl)}
+
+/* MAP MARKERS — monochrome dots */
+.mpin{width:20px;height:20px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.35);cursor:pointer;transition:transform .15s}
+.mpin:hover{transform:scale(1.15)}
+.mpin-done{background:#2d5a3d!important}
+.mpin-custom{border-style:dashed!important}
+.leaflet-popup-content-wrapper{border-radius:11px;box-shadow:0 4px 20px rgba(15,14,11,.18);border:1px solid var(--line);padding:0;overflow:hidden}
 .leaflet-popup-content{margin:0;width:auto!important}
-.pop{padding:14px 16px;cursor:pointer;min-width:170px;background:#fff}
-.pop-n{font-family:'Playfair Display',serif;font-size:15px;margin-bottom:3px;color:var(--ink)}
-.pop-m{font-size:11px;color:var(--ink-3)}
-.pop-d{display:inline-block;margin-top:6px;font-size:10px;letter-spacing:0.5px;background:var(--forest-pale);color:var(--forest);padding:2px 8px;border-radius:10px;font-weight:600}
+.pop{padding:13px 15px;cursor:pointer;min-width:160px;background:#fff}
+.pop-n{font-family:'Playfair Display',serif;font-size:14px;margin-bottom:2px;color:var(--ink)}
+.pop-m{font-size:11px;color:var(--ink3)}
+.pop-done{display:inline-block;margin-top:5px;font-size:10px;letter-spacing:.4px;background:var(--gp);color:var(--g);padding:2px 7px;border-radius:9px;font-weight:600}
+.pop-custom{display:inline-block;margin-top:5px;font-size:10px;letter-spacing:.4px;background:#fff3e0;color:#8a5010;padding:2px 7px;border-radius:9px;font-weight:600}
 .leaflet-popup-tip-container{display:none}
-.ydot{width:14px;height:14px;border-radius:50%;background:#4a90d9;border:3px solid #fff;box-shadow:0 0 0 3px rgba(74,144,217,0.3);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(74,144,217,0.3)}50%{box-shadow:0 0 0 6px rgba(74,144,217,0.1)}}
+.ydot{width:13px;height:13px;border-radius:50%;background:#4a90d9;border:3px solid #fff;box-shadow:0 0 0 3px rgba(74,144,217,.28);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(74,144,217,.28)}50%{box-shadow:0 0 0 6px rgba(74,144,217,.1)}}
 
 /* TOAST */
-.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:40px;font-size:12px;font-weight:500;z-index:9998;opacity:0;transition:all 0.3s cubic-bezier(.16,1,.3,1);pointer-events:none;letter-spacing:0.2px;box-shadow:0 8px 24px rgba(0,0,0,0.3)}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(6px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:40px;font-size:12px;font-weight:500;z-index:9998;opacity:0;transition:all .28s cubic-bezier(.16,1,.3,1);pointer-events:none;letter-spacing:.2px;box-shadow:0 6px 20px rgba(0,0,0,.28)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
 
-<div id="login-screen">
+<!-- LOGIN -->
+<div id="login">
   <div class="ll">
     <div class="ll-bg">ALPEN</div>
-    <div class="ll-content">
+    <div class="ll-c">
       <div class="ll-eye">Private Wanderliste</div>
       <div class="ll-h">Unsere<br><em>Berge</em>,<br>unsere Touren.</div>
-      <div class="ll-div"></div>
-      <div class="ll-sub">Jede Wanderung, jeder Gipfel, jede Erinnerung — alles an einem Ort für uns beide.</div>
+      <div class="ll-hr"></div>
+      <div class="ll-s">Jede Wanderung, jeder Gipfel, jede Erinnerung — für uns zwei.</div>
     </div>
   </div>
   <div class="lr">
-    <svg class="lr-mtico" viewBox="0 0 48 48" fill="none" stroke="var(--forest)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M4 40L14 20L22 32L30 18L44 40z"/><path d="M30 18L34 24" opacity="0.4"/>
+    <svg class="lr-ico" viewBox="0 0 40 40" fill="none" stroke="var(--g)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 34L12 16L20 27L27 14L37 34z"/><path d="M27 14L31 20" opacity=".35"/>
     </svg>
-    <div class="lr-title">Willkommen zurück</div>
-    <div class="lr-sub">Melde dich mit deinem Konto an</div>
-    <div class="lf">
-      <label class="lbl">E-Mail</label>
-      <input class="linput" id="li-email" type="email" placeholder="name@email.ch" autocomplete="email">
-      <label class="lbl">Passwort</label>
-      <input class="linput" id="li-pw" type="password" placeholder="••••••••" autocomplete="current-password">
-      <button class="lbtn" id="li-btn">Anmelden</button>
-      <div class="lerr" id="li-err"></div>
-    </div>
-    <div class="lnote">Kein Konto erstellen möglich —<br>nur eingeladene Nutzer haben Zugriff</div>
+    <div class="lr-t">Willkommen zurück</div>
+    <div class="lr-s">Melde dich mit deinem Konto an</div>
+    <label class="lbl">E-Mail</label>
+    <input class="linp" id="li-em" type="email" placeholder="name@email.ch" autocomplete="email">
+    <label class="lbl">Passwort</label>
+    <input class="linp" id="li-pw" type="password" placeholder="••••••••" autocomplete="current-password">
+    <button class="lbtn" id="li-btn">Anmelden</button>
+    <div class="lerr" id="li-err"></div>
+    <div class="lnote">Kein Konto erstellen möglich — nur eingeladene Nutzer</div>
   </div>
 </div>
 
+<!-- APP -->
 <div id="app">
   <header>
     <div class="logo">Wander<em>liste</em></div>
     <nav class="hnav">
-      <button class="nbtn active" id="nav-map" onclick="sw('map')">
+      <button class="nb on" id="nav-map" onclick="sw('map')">
         <svg viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>Karte
       </button>
-      <button class="nbtn" id="nav-stats" onclick="sw('stats')">
+      <button class="nb" id="nav-stats" onclick="sw('stats')">
         <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Statistiken
       </button>
-      <button class="nbtn" id="nav-settings" onclick="sw('settings')">
+      <button class="nb" id="nav-settings" onclick="sw('settings')">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Einstellungen
       </button>
     </nav>
-    <div class="hright">
-      <button class="loc-btn" title="Meine Position anzeigen" onclick="locateUser()">
+    <div class="hr">
+      <button class="locbtn" title="Meine Position" onclick="locUser()">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7"/></svg>
       </button>
       <div class="upill">
-        <div class="av" id="user-av">?</div>
-        <span class="uname" id="user-nm">…</span>
-        <svg style="width:11px;height:11px;stroke:rgba(255,255,255,0.4);fill:none;stroke-width:2;stroke-linecap:round;margin-left:1px" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        <div class="av" id="uav">?</div>
+        <span class="uname" id="unm">…</span>
       </div>
     </div>
   </header>
 
-  <div class="view active" id="map-view">
+  <!-- MAP VIEW -->
+  <div class="view on" id="map-view">
     <div id="map"></div>
+
+    <!-- DETAIL PANEL -->
     <div id="det">
       <div class="dh" id="dh">
         <div class="dh-ph" id="dh-ph">
-          <svg viewBox="0 0 48 48"><path d="M4 40L14 20L22 32L30 18L44 40z" stroke="rgba(255,255,255,0.15)" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 48 48"><path d="M4 40L14 20L22 32L30 18L44 40z"/><path d="M14 20L18 26" opacity=".4"/></svg>
           <span>Kein Foto vorhanden</span>
         </div>
         <div class="dh-grad"></div>
-        <button class="dh-x" id="det-close">
+        <button class="dh-x" id="det-x">
           <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
         <div class="dh-ov">
@@ -327,34 +340,45 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
           <div class="dh-loc" id="dh-loc">—</div>
         </div>
       </div>
-      <div class="db-body">
+      <div class="dbody">
         <div class="dstats" id="dstats"></div>
-        <div id="ddiff" style="margin-bottom:14px"></div>
-        <div class="ddesc" id="ddesc"></div>
-        <div class="dactions" id="dactions"></div>
-        <div class="sh">Routen</div>
-        <div id="droutes"></div>
-        <div class="sh" id="dmhead" style="display:none;margin-top:20px">Unsere Fotos</div>
-        <div class="mgrid" id="dmgrid"></div>
-        <div id="dupload" style="display:none;margin-top:4px">
+        <div id="ddiff" style="margin-bottom:14px;display:flex;gap:6px;align-items:center"></div>
+        <div class="dactions" id="dact"></div>
+
+        <div class="sh" style="margin-top:2px">Startpunkt & Anreise</div>
+        <div class="info-grid" id="d-info-start"></div>
+
+        <div class="sh" style="margin-top:4px">Route</div>
+        <div class="info-grid" id="d-info-route"></div>
+
+        <div class="sh" style="margin-top:4px" id="d-media-head" style="display:none">Unsere Fotos</div>
+        <div class="mgrid" id="d-mgrid"></div>
+
+        <div id="d-upload" style="display:none;margin-top:2px">
           <div class="sh">Medien hochladen</div>
           <label class="upz">
-            <input type="file" id="dfile" multiple accept="image/*,video/*">
-            <svg class="upload-ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <div class="upt">Dateien auswählen oder hierher ziehen</div>
+            <input type="file" id="d-file" multiple accept="image/*,video/*">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <div class="upz-t">Fotos oder Videos auswählen</div>
           </label>
         </div>
       </div>
     </div>
+
+    <!-- SIDE LIST -->
     <div class="sp">
       <div class="sp-hd">
         <div class="sp-top">
           <div class="sp-title">Wanderungen</div>
           <div class="sp-cnt" id="spcnt">0</div>
+          <button class="add-btn" onclick="openAddModal()">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Eigene
+          </button>
         </div>
         <div class="sw">
           <svg class="swico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input class="sinput" id="hsearch" placeholder="Berg oder Kanton suchen…" oninput="fH()">
+          <input class="sinp" id="hsearch" placeholder="Berg, Kanton oder Region…" oninput="fH()">
         </div>
         <div class="frow">
           <div class="fc on" data-d="all" onclick="sDF(this)">Alle</div>
@@ -363,12 +387,14 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
           <div class="fc" data-d="hard" onclick="sDF(this)">Schwer</div>
           <div class="fc" data-d="expert" onclick="sDF(this)">Experte</div>
           <div class="fc" data-d="done" onclick="sDF(this)">✓ Gemacht</div>
+          <div class="fc" data-d="custom" onclick="sDF(this)">⊕ Eigene</div>
         </div>
       </div>
       <div class="hlist" id="hlist"></div>
     </div>
   </div>
 
+  <!-- STATS -->
   <div class="view" id="stats-view">
     <div class="si">
       <div class="shero">
@@ -385,23 +411,22 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
     </div>
   </div>
 
+  <!-- SETTINGS -->
   <div class="view" id="settings-view">
     <div class="setc">
       <div class="set-t">Mein Profil</div>
       <div class="set-s">Name und Konto-Einstellungen</div>
-      <label class="fl">Anzeigename</label>
-      <input class="fi" id="s-name" type="text">
-      <label class="fl">E-Mail</label>
-      <input class="fi" id="s-email" type="email" disabled>
+      <label class="fl">Anzeigename</label><input class="fi" id="s-name" type="text">
+      <label class="fl">E-Mail</label><input class="fi" id="s-email" type="email" disabled>
       <button class="ssave" onclick="saveProfile()">Speichern</button>
     </div>
     <div class="setc">
       <div class="set-t">Erscheinungsbild</div>
-      <div class="set-s">Akzentfarbe der Karte und UI</div>
+      <div class="set-s">Akzentfarbe der UI</div>
       <label class="fl">Farbe wählen</label>
       <div class="crow" id="crow"></div>
     </div>
-    <div class="setc" style="border-color:rgba(122,45,45,0.25)">
+    <div class="setc" style="border-color:rgba(122,45,45,.22)">
       <div class="set-t">Konto</div>
       <div class="set-s">Abmelden von diesem Gerät</div>
       <button class="slo" onclick="doLogout()">Abmelden</button>
@@ -409,23 +434,119 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
   </div>
 </div>
 
-<div class="mbg" id="modal">
+<!-- COMPLETE MODAL -->
+<div class="mbg" id="modal-complete">
   <div class="modal">
     <div class="mt">Wanderung abgehakt</div>
     <div class="ms">Wie war die Tour?</div>
     <label class="fl">Datum</label>
-    <input class="fi" id="m-date" type="date" style="margin-bottom:16px">
+    <input class="fi" id="m-date" type="date" style="margin-bottom:14px">
     <label class="fl">Bewertung</label>
     <div class="srow" id="stars">
       <span class="star" onclick="setStar(1)">★</span><span class="star" onclick="setStar(2)">★</span>
-      <span class="star" onclick="setStar(3)">★</span><span class="star" onclick="setStar(4)">★</span>
-      <span class="star" onclick="setStar(5)">★</span>
+      <span class="star" onclick="setStar(3)">★</span><span class="star" onclick="setStar(4)">★</span><span class="star" onclick="setStar(5)">★</span>
     </div>
-    <label class="fl" style="margin-top:16px">Notizen</label>
+    <label class="fl" style="margin-top:14px">Notizen</label>
     <textarea class="fi" id="m-notes" rows="3" placeholder="Eindrücke, Wetter, Besonderes…" style="resize:none;margin-bottom:0"></textarea>
     <div class="mfoot">
-      <button class="mcan" onclick="closeModal()">Abbrechen</button>
+      <button class="mcan" onclick="closeModals()">Abbrechen</button>
       <button class="mok" onclick="confirmComplete()">Bestätigen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CUSTOM HIKE MODAL -->
+<div class="mbg" id="modal-add">
+  <div class="modal wide">
+    <div class="mt">Eigene Wanderung erfassen</div>
+    <div class="ms">Trage deine Wanderung manuell ein</div>
+    <div class="form-grid">
+      <div class="full">
+        <label class="fl">Name der Wanderung *</label>
+        <input class="fi" id="c-name" type="text" placeholder="z.B. Hausstock via Fridolinshütte">
+      </div>
+      <div>
+        <label class="fl">Kanton</label>
+        <input class="fi" id="c-canton" type="text" placeholder="z.B. GL">
+      </div>
+      <div>
+        <label class="fl">Region</label>
+        <input class="fi" id="c-region" type="text" placeholder="z.B. Glarner Alpen">
+      </div>
+      <div>
+        <label class="fl">Gipfelhöhe (m)</label>
+        <input class="fi" id="c-elev" type="number" placeholder="z.B. 2500">
+      </div>
+      <div>
+        <label class="fl">Höhenmeter (Aufstieg)</label>
+        <input class="fi" id="c-gain" type="number" placeholder="z.B. 1200">
+      </div>
+      <div>
+        <label class="fl">Distanz (km)</label>
+        <input class="fi" id="c-km" type="number" step="0.1" placeholder="z.B. 12.5">
+      </div>
+      <div>
+        <label class="fl">Dauer (Stunden)</label>
+        <input class="fi" id="c-hours" type="number" step="0.5" placeholder="z.B. 5.5">
+      </div>
+      <div>
+        <label class="fl">Schwierigkeit</label>
+        <select class="form-sel fi" id="c-diff">
+          <option value="easy">Leicht (T1–T2)</option>
+          <option value="medium" selected>Mittel (T3)</option>
+          <option value="hard">Schwer (T4)</option>
+          <option value="expert">Experte (T5+)</option>
+        </select>
+      </div>
+      <div>
+        <label class="fl">Tourentyp</label>
+        <select class="form-sel fi" id="c-type">
+          <option value="Rundtour">Rundtour</option>
+          <option value="Traverse">Traverse / Überschreitung</option>
+          <option value="Aufstieg-Abstieg">Aufstieg & Abstieg gleicher Weg</option>
+          <option value="Hüttentour">Hüttentour</option>
+        </select>
+      </div>
+      <div>
+        <label class="fl">Beste Saison</label>
+        <input class="fi" id="c-season" type="text" placeholder="z.B. Juni–Oktober">
+      </div>
+      <div class="full">
+        <label class="fl">Startpunkt</label>
+        <input class="fi" id="c-start" type="text" placeholder="z.B. Parkplatz Elm, Talstation">
+      </div>
+      <div class="full">
+        <label class="fl">Parkplatz-Info</label>
+        <input class="fi" id="c-parking" type="text" placeholder="z.B. Grosser Parkplatz, kostenlos">
+      </div>
+      <div class="full">
+        <label class="fl">Öffentliche Verkehrsmittel</label>
+        <input class="fi" id="c-pt" type="text" placeholder="z.B. Bus ab Glarus nach Elm">
+      </div>
+      <div class="full">
+        <label class="fl">Beschreibung</label>
+        <textarea class="fi" id="c-desc" rows="2" placeholder="Kurzbeschreibung der Wanderung…" style="resize:none"></textarea>
+      </div>
+      <div class="full">
+        <label class="fl">Routenbeschreibung</label>
+        <textarea class="fi" id="c-route" rows="3" placeholder="Detaillierter Routenverlauf…" style="resize:none"></textarea>
+      </div>
+      <div class="full">
+        <label class="fl">Koordinaten Gipfel (Lat, Lng) — Klicke auf Karte oder manuell eingeben</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <input class="fi" id="c-lat" type="number" step="0.0001" placeholder="z.B. 46.8068" style="margin-bottom:0">
+          <input class="fi" id="c-lng" type="number" step="0.0001" placeholder="z.B. 8.9139" style="margin-bottom:0">
+        </div>
+        <div style="font-size:11px;color:var(--g);margin-top:6px">💡 Tipp: Karte auf den Gipfel klicken, dann Koordinaten werden hier eingetragen</div>
+      </div>
+      <div class="full">
+        <label class="fl">Link (optional)</label>
+        <input class="fi" id="c-url" type="url" placeholder="https://www.hikr.org/…" style="margin-bottom:0">
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="mcan" onclick="closeModals()">Abbrechen</button>
+      <button class="mok" onclick="saveCustomHike()">Wanderung speichern</button>
     </div>
   </div>
 </div>
@@ -436,36 +557,34 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
 const SU='https://dlgqkesrpfidadbtfrnr.supabase.co';
 const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsZ3FrZXNycGZpZGFkYnRmcm5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NjgwNjUsImV4cCI6MjA5NDQ0NDA2NX0.9pgYnMAPspSogAmzEN4zetV0fQGHpDxNWio1fq1dTqk';
 const sb=window.supabase.createClient(SU,SK);
+
 let user=null,profile=null,hikes=[],completed=[],markers={},map=null;
-let cur=null,dF='all',sQ='',sRat=0;
-const DL={easy:'Leicht',medium:'Mittel',hard:'Schwer',expert:'Experte'};
-const DC={easy:'#1e6630',medium:'#7a5a10',hard:'#c87941',expert:'#5a1080'};
-const ROUTES={
-  easy:['Normalweg via Talstation (2–3h)','Familienrundweg (2h)','Bergbahn & Abstieg (1.5h)'],
-  medium:['Hauptweg via Alp (4–5h)','Gratwanderung (3.5h)','Via Passhöhe (5h)'],
-  hard:['Direktaufstieg (5h)','Nordwand-Route (6h)','Gipfelgrat-Variante (5.5h)'],
-  expert:['Hochtour Hauptgrat (8h)','Klettertour Ostpfeiler (9h)','Skialpinismus-Route']
-};
+let cur=null,dF='all',sQ='',sRat=0,pickMode=false;
+
+const DL={easy:'Leicht (T1–T2)',medium:'Mittel (T3)',hard:'Schwer (T4)',expert:'Experte (T5+)'};
+const DS={easy:'Leicht',medium:'Mittel',hard:'Schwer',expert:'Experte'};
+const DC={easy:'#555',medium:'#666',hard:'#444',expert:'#333'};
+
 const ACCENTS=[
-  {c:'#2d5a3d',n:'Tannengrün'},{c:'#1a4d6e',n:'Bergblau'},{c:'#6b3d1e',n:'Kastanienbraun'},
-  {c:'#3d1a4d',n:'Alpenveilchen'},{c:'#4d3a1a',n:'Herbstgold'},{c:'#1a4d4d',n:'Gletscherteal'},{c:'#4a2a2a',n:'Alpenrose'},
+  {c:'#2d5a3d',n:'Tannengrün'},{c:'#1a4d6e',n:'Bergblau'},{c:'#5a3d1e',n:'Kastanie'},
+  {c:'#3d1a4d',n:'Veilchen'},{c:'#4d1a1a',n:'Alpenrose'},{c:'#1a4d4d',n:'Gletscherteal'},
 ];
 
+/* ─── AUTH ─── */
 sb.auth.onAuthStateChange(async(_,sess)=>{if(sess)await boot(sess.user);else showLogin()});
-
 document.getElementById('li-btn').onclick=async()=>{
-  const e=document.getElementById('li-email').value.trim(),p=document.getElementById('li-pw').value;
+  const e=document.getElementById('li-em').value.trim(),p=document.getElementById('li-pw').value;
   document.getElementById('li-err').textContent='';
   const{error}=await sb.auth.signInWithPassword({email:e,password:p});
-  if(error)document.getElementById('li-err').textContent='Ungültige Zugangsdaten. Bitte erneut versuchen.';
+  if(error)document.getElementById('li-err').textContent='Ungültige Zugangsdaten.';
 };
 document.getElementById('li-pw').onkeydown=e=>{if(e.key==='Enter')document.getElementById('li-btn').click()};
-
-function showLogin(){document.getElementById('login-screen').style.display='flex';document.getElementById('app').style.display='none'}
+function showLogin(){document.getElementById('login').style.display='flex';document.getElementById('app').style.display='none'}
+async function doLogout(){await sb.auth.signOut();showLogin()}
 
 async function boot(u){
   user=u;
-  document.getElementById('login-screen').style.display='none';
+  document.getElementById('login').style.display='none';
   document.getElementById('app').style.display='flex';
   await Promise.all([loadProfile(),loadData()]);
   initMap();initSettings();
@@ -475,121 +594,177 @@ async function loadProfile(){
   const{data}=await sb.from('profiles').select('*').eq('id',user.id).single();
   if(!data)return;profile=data;
   const init=(data.display_name||data.username||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  document.getElementById('user-av').textContent=init;
-  document.getElementById('user-nm').textContent=data.display_name||data.username;
+  document.getElementById('uav').textContent=init;
+  document.getElementById('unm').textContent=data.display_name||data.username;
   if(data.ui_accent_color)applyAccent(data.ui_accent_color);
 }
 
-async function doLogout(){await sb.auth.signOut();showLogin()}
-
+/* ─── DATA ─── */
 async function loadData(){
   const[h,c]=await Promise.all([sb.from('hikes').select('*').order('name'),sb.from('completed_hikes').select('*')]);
   hikes=h.data||[];completed=c.data||[];
-  renderList();document.getElementById('spcnt').textContent=`${completed.length} / ${hikes.length}`;
+  renderList();document.getElementById('spcnt').textContent=`${completed.length}/${hikes.length}`;
 }
-
 const isDone=id=>completed.some(c=>c.hike_id===id);
 
+/* ─── MAP ─── */
 function initMap(){
   if(map)map.remove();
-  map=L.map('map',{zoomControl:false}).setView([46.8,8.3],8);
-  L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17}).addTo(map);
+  // Monochrome CartoDB Positron — grey/white, no colour noise
+  map=L.map('map',{zoomControl:false}).setView([46.85,8.3],8);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+    attribution:'© CartoDB',maxZoom:19,subdomains:'abcd'
+  }).addTo(map);
   L.control.zoom({position:'bottomright'}).addTo(map);
-  placeMarkers();locateUser();
+
+  // Click on map to pick coords for custom hike
+  map.on('click',e=>{
+    if(!pickMode)return;
+    document.getElementById('c-lat').value=e.latlng.lat.toFixed(5);
+    document.getElementById('c-lng').value=e.latlng.lng.toFixed(5);
+    toast('Koordinaten eingetragen ✓');
+  });
+
+  placeMarkers();locUser();
 }
 
 function placeMarkers(){
-  Object.values(markers).forEach(m=>m.remove());markers={};
+  Object.values(markers).forEach(m=>{try{m.remove()}catch(_){}});markers={};
   hikes.forEach(h=>{
     const done=isDone(h.id);
-    const col=done?'var(--forest)':DC[h.difficulty];
+    const col=done?'#2d5a3d':'#1a1a18';
+    const size=h.elevation_m>3000?22:18;
     const icon=L.divIcon({
       className:'',
-      html:`<div class="mpin" style="background:${done?'#2d5a3d':col}"></div>`,
-      iconSize:[22,22],iconAnchor:[11,22],popupAnchor:[0,-24]
+      html:`<div class="mpin${done?' mpin-done':''}${h.is_custom?' mpin-custom':''}" style="background:${col};width:${size}px;height:${size}px;border-width:${done?'2.5':'2'}px"></div>`,
+      iconSize:[size,size],iconAnchor:[size/2,size],popupAnchor:[0,-size-2]
     });
     const m=L.marker([h.lat,h.lng],{icon}).addTo(map);
     m.bindPopup(`<div class="pop" onclick="openHike('${h.id}')">
       <div class="pop-n">${h.name}</div>
-      <div class="pop-m">${h.elevation_m.toLocaleString()}m · ${h.canton} · ${DL[h.difficulty]}</div>
-      ${done?'<div class="pop-d">✓ Gemacht</div>':''}
+      <div class="pop-m">${h.elevation_m?h.elevation_m.toLocaleString()+'m · ':''}${h.canton||''} · ${DS[h.difficulty]||''}</div>
+      ${done?'<div class="pop-done">✓ Gemacht</div>':''}
+      ${h.is_custom?'<div class="pop-custom">⊕ Eigene</div>':''}
     </div>`,{closeButton:false});
     m.on('click',()=>openHike(h.id));
     markers[h.id]=m;
   });
 }
 
-function locateUser(){
+function locUser(){
   if(!navigator.geolocation)return;
   navigator.geolocation.getCurrentPosition(p=>{
-    const ico=L.divIcon({className:'',html:'<div class="ydot"></div>',iconSize:[14,14],iconAnchor:[7,7]});
+    const ico=L.divIcon({className:'',html:'<div class="ydot"></div>',iconSize:[13,13],iconAnchor:[6,6]});
     L.marker([p.coords.latitude,p.coords.longitude],{icon:ico}).addTo(map)
       .bindPopup('<div class="pop"><div class="pop-n">Du bist hier</div></div>',{closeButton:false});
   },()=>{});
 }
 
+/* ─── LIST ─── */
 function renderList(){
   const q=sQ.toLowerCase();
   const f=hikes.filter(h=>{
-    const mq=!q||h.name.toLowerCase().includes(q)||h.canton.toLowerCase().includes(q)||h.region.toLowerCase().includes(q);
+    const mq=!q||h.name.toLowerCase().includes(q)||
+      (h.canton||'').toLowerCase().includes(q)||
+      (h.region||'').toLowerCase().includes(q)||
+      (h.description||'').toLowerCase().includes(q);
     const done=isDone(h.id);
-    return mq&&(dF==='all'||(dF==='done'?done:h.difficulty===dF));
+    if(dF==='all')return mq;
+    if(dF==='done')return mq&&done;
+    if(dF==='custom')return mq&&h.is_custom;
+    return mq&&h.difficulty===dF;
   });
   document.getElementById('hlist').innerHTML=f.map(h=>{
     const done=isDone(h.id);
     return`<div class="hi${done?' done':''}" onclick="openHike('${h.id}')">
       <div class="hi-r1">
         <div class="hi-nm">${h.name}</div>
-        <div class="hi-tick"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="hi-tick"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       </div>
       <div class="hi-meta">
-        <span class="hi-elev">${h.elevation_m.toLocaleString()}m</span>
-        <span class="hi-can">· ${h.canton}</span>
-        <span class="db db-${h.difficulty}">${DL[h.difficulty]}</span>
+        ${h.elevation_m?`<span class="hi-elev">${h.elevation_m.toLocaleString()}m</span>`:''}
+        ${h.canton?`<span class="hi-can">· ${h.canton}</span>`:''}
+        <span class="db db-${h.difficulty}">${DS[h.difficulty]}</span>
+        ${h.is_custom?'<span class="hi-custom">⊕ Eigene</span>':''}
       </div>
     </div>`;
-  }).join('');
+  }).join('')||'<div style="padding:24px;text-align:center;font-size:12px;color:var(--ink3)">Keine Wanderungen gefunden</div>';
 }
 
 function fH(){sQ=document.getElementById('hsearch').value;renderList()}
 function sDF(el){document.querySelectorAll('.fc').forEach(e=>e.classList.remove('on'));el.classList.add('on');dF=el.dataset.d;renderList()}
 
+/* ─── DETAIL ─── */
 async function openHike(id){
   cur=hikes.find(h=>h.id===id);if(!cur)return;
-  document.getElementById('det').classList.add('open');
+  const det=document.getElementById('det');
+  det.classList.add('on');
+
   document.getElementById('dh-nm').textContent=cur.name;
-  document.getElementById('dh-loc').textContent=`${cur.region} · ${cur.canton}`;
+  document.getElementById('dh-loc').textContent=[cur.region,cur.canton].filter(Boolean).join(' · ');
+
+  // Stats
   document.getElementById('dstats').innerHTML=`
-    <div class="dsb"><div class="dsb-v">${cur.elevation_m.toLocaleString()}</div><div class="dsb-l">Höhe (m)</div></div>
-    <div class="dsb"><div class="dsb-v">${cur.distance_km}</div><div class="dsb-l">km</div></div>
-    <div class="dsb"><div class="dsb-v">${cur.typical_duration_hours}</div><div class="dsb-l">Stunden</div></div>`;
-  document.getElementById('ddiff').innerHTML=`<span class="db db-${cur.difficulty}">${DL[cur.difficulty]}</span>`;
-  document.getElementById('ddesc').textContent=cur.description||'';
+    ${cur.elevation_m?`<div class="dsb"><div class="dsb-v">${cur.elevation_m.toLocaleString()}</div><div class="dsb-l">Höhe m</div></div>`:''}
+    ${cur.elevation_gain_m?`<div class="dsb"><div class="dsb-v">${cur.elevation_gain_m.toLocaleString()}</div><div class="dsb-l">Aufstieg m</div></div>`:''}
+    ${cur.distance_km?`<div class="dsb"><div class="dsb-v">${cur.distance_km}</div><div class="dsb-l">km</div></div>`:''}
+    ${cur.typical_duration_hours?`<div class="dsb"><div class="dsb-v">${cur.typical_duration_hours}</div><div class="dsb-l">Stunden</div></div>`:''}
+  `;
+
+  // Diff + trail type
+  const diffEl=document.getElementById('ddiff');
+  diffEl.innerHTML=`<span class="db db-${cur.difficulty}">${DL[cur.difficulty]||DS[cur.difficulty]}</span>`;
+  if(cur.trail_type)diffEl.innerHTML+=`<span style="font-size:11px;color:var(--ink3)">${cur.trail_type}</span>`;
+  if(cur.best_season)diffEl.innerHTML+=`<span style="font-size:11px;color:var(--ink3)">· ${cur.best_season}</span>`;
+
+  // Description
   const done=isDone(cur.id);
-  document.getElementById('dactions').innerHTML=done
-    ?`<button class="bd" onclick="undoHike()">Als nicht gemacht markieren</button>`
-    :`<button class="bp" onclick="openModal()">Als gemacht markieren ✓</button>`;
-  document.getElementById('dupload').style.display=done?'block':'none';
-  document.getElementById('droutes').innerHTML=(ROUTES[cur.difficulty]||ROUTES.medium).map(r=>`<div class="ri"><div class="rdot"></div><span>${r}</span></div>`).join('');
+
+  // Actions
+  document.getElementById('dact').innerHTML=`
+    ${!done?`<button class="bp" onclick="openCompleteModal()">Als gemacht markieren ✓</button>`:''}
+    ${done?`<button class="bd" onclick="undoHike()">Als nicht gemacht markieren</button>`:''}
+    ${cur.is_custom&&cur.created_by===user.id?`<button class="bd" style="border-color:rgba(122,45,45,.2);font-size:11px;padding:8px" onclick="deleteCustomHike()">Wanderung löschen</button>`:''}
+  `;
+
+  // Start / Anreise info
+  document.getElementById('d-info-start').innerHTML=`
+    ${cur.description?`<div class="info-box full"><div class="info-lbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Beschreibung</div><div class="info-val">${cur.description}</div></div>`:''}
+    ${cur.start_point?`<div class="info-box"><div class="info-lbl"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Startpunkt</div><div class="info-val">${cur.start_point}</div></div>`:''}
+    ${cur.parking_info?`<div class="info-box"><div class="info-lbl"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/></svg>Parkplatz</div><div class="info-val">${cur.parking_info}</div></div>`:''}
+    ${cur.public_transport?`<div class="info-box full"><div class="info-lbl"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="M8 19l-2 2"/><path d="M18 21l-2-2"/></svg>Öffentlicher Verkehr</div><div class="info-val">${cur.public_transport}</div></div>`:''}
+  `;
+
+  // Route info
+  document.getElementById('d-info-route').innerHTML=`
+    ${cur.route_description?`<div class="info-box full"><div class="info-lbl"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Routenverlauf</div><div class="info-val">${cur.route_description}</div></div>`:''}
+    ${cur.external_url?`<div class="info-box full"><div class="info-lbl"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Mehr Infos</div><a class="ext-link" href="${cur.external_url}" target="_blank">${cur.external_url.replace(/^https?:\/\//,'').split('/')[0]}<svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></div>`:''}
+  `;
+
+  // Upload zone
+  document.getElementById('d-upload').style.display=done?'block':'none';
+
   await loadMedia(cur.id);
-  map.flyTo([cur.lat,cur.lng],12,{duration:1});
+  map.flyTo([cur.lat,cur.lng],12,{duration:1.2});
 }
 
 async function loadMedia(hikeId){
   const{data}=await sb.from('hike_media').select('*').eq('hike_id',hikeId).order('created_at',{ascending:false});
-  const g=document.getElementById('dmgrid'),hd=document.getElementById('dmhead');
+  const g=document.getElementById('d-mgrid'),hd=document.getElementById('d-media-head');
   if(data&&data.length){
     hd.style.display='flex';
     g.innerHTML=data.map(m=>{
       const url=`${SU}/storage/v1/object/public/hike-media/${m.storage_path}`;
-      return m.media_type==='video'?`<div class="mthumb"><video src="${url}" controls></video></div>`:`<div class="mthumb"><img src="${url}" loading="lazy" alt=""></div>`;
+      return m.media_type==='video'
+        ?`<div class="mth"><video src="${url}" controls></video></div>`
+        :`<div class="mth"><img src="${url}" loading="lazy" alt=""></div>`;
     }).join('');
   }else{hd.style.display='none';g.innerHTML=''}
 }
 
-document.getElementById('det-close').onclick=()=>{document.getElementById('det').classList.remove('open');cur=null};
+document.getElementById('det-x').onclick=()=>{document.getElementById('det').classList.remove('on');cur=null};
 
-document.getElementById('dfile').onchange=async function(){
+document.getElementById('d-file').onchange=async function(){
   if(!cur)return;
   for(const file of Array.from(this.files)){
     const ext=file.name.split('.').pop();
@@ -601,12 +776,16 @@ document.getElementById('dfile').onchange=async function(){
   await loadMedia(cur.id);toast('Medien hochgeladen ✓');this.value='';
 };
 
-function openModal(){
+/* ─── COMPLETE ─── */
+function openCompleteModal(){
   document.getElementById('m-date').value=new Date().toISOString().split('T')[0];
   document.getElementById('m-notes').value='';setStar(0);
-  document.getElementById('modal').classList.add('open');
+  document.getElementById('modal-complete').classList.add('on');
 }
-function closeModal(){document.getElementById('modal').classList.remove('open')}
+function closeModals(){
+  document.querySelectorAll('.mbg').forEach(m=>m.classList.remove('on'));
+  pickMode=false;
+}
 function setStar(n){sRat=n;document.querySelectorAll('#stars .star').forEach((s,i)=>s.classList.toggle('lit',i<n))}
 
 async function confirmComplete(){
@@ -617,7 +796,8 @@ async function confirmComplete(){
     rating:sRat||null,notes:document.getElementById('m-notes').value||null
   });
   if(error){toast('Fehler: '+error.message);return}
-  closeModal();await loadData();placeMarkers();openHike(cur.id);toast(cur.name+' abgehakt ✓');
+  closeModals();await loadData();placeMarkers();openHike(cur.id);
+  toast(cur.name+' abgehakt ✓');
 }
 
 async function undoHike(){
@@ -626,42 +806,102 @@ async function undoHike(){
   await loadData();placeMarkers();openHike(cur.id);toast('Zurückgesetzt');
 }
 
+async function deleteCustomHike(){
+  if(!cur||!cur.is_custom)return;
+  if(!confirm('Wanderung wirklich löschen?'))return;
+  await sb.from('hike_media').delete().eq('hike_id',cur.id);
+  await sb.from('completed_hikes').delete().eq('hike_id',cur.id);
+  await sb.from('hikes').delete().eq('id',cur.id);
+  document.getElementById('det').classList.remove('on');cur=null;
+  await loadData();placeMarkers();toast('Wanderung gelöscht');
+}
+
+/* ─── ADD CUSTOM HIKE ─── */
+function openAddModal(){
+  document.querySelectorAll('#modal-add input,#modal-add textarea,#modal-add select').forEach(el=>{
+    if(el.tagName==='SELECT')el.selectedIndex=1;
+    else el.value='';
+  });
+  document.getElementById('modal-add').classList.add('on');
+  pickMode=true;
+  toast('Klicke auf die Karte um die Position zu setzen');
+}
+
+async function saveCustomHike(){
+  const name=document.getElementById('c-name').value.trim();
+  const lat=parseFloat(document.getElementById('c-lat').value);
+  const lng=parseFloat(document.getElementById('c-lng').value);
+  if(!name){toast('Name ist erforderlich');return}
+  if(isNaN(lat)||isNaN(lng)){toast('Bitte Koordinaten eingeben (Karte anklicken)');return}
+
+  const{data,error}=await sb.from('hikes').insert({
+    name,
+    canton:document.getElementById('c-canton').value.trim()||null,
+    region:document.getElementById('c-region').value.trim()||null,
+    elevation_m:parseInt(document.getElementById('c-elev').value)||null,
+    elevation_gain_m:parseInt(document.getElementById('c-gain').value)||null,
+    distance_km:parseFloat(document.getElementById('c-km').value)||null,
+    typical_duration_hours:parseFloat(document.getElementById('c-hours').value)||null,
+    difficulty:document.getElementById('c-diff').value,
+    trail_type:document.getElementById('c-type').value,
+    best_season:document.getElementById('c-season').value.trim()||null,
+    start_point:document.getElementById('c-start').value.trim()||null,
+    parking_info:document.getElementById('c-parking').value.trim()||null,
+    public_transport:document.getElementById('c-pt').value.trim()||null,
+    description:document.getElementById('c-desc').value.trim()||null,
+    route_description:document.getElementById('c-route').value.trim()||null,
+    external_url:document.getElementById('c-url').value.trim()||null,
+    lat,lng,
+    is_custom:true,
+    created_by:user.id
+  }).select().single();
+
+  if(error){toast('Fehler: '+error.message);return}
+  closeModals();pickMode=false;
+  await loadData();placeMarkers();
+  toast(name+' gespeichert ✓');
+  if(data)openHike(data.id);
+}
+
+/* ─── VIEWS ─── */
 function sw(v){
-  document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
-  document.querySelectorAll('.nbtn').forEach(e=>e.classList.remove('active'));
-  document.getElementById(v+'-view').classList.add('active');
-  document.getElementById('nav-'+v).classList.add('active');
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(e=>e.classList.remove('on'));
+  document.getElementById(v+'-view').classList.add('on');
+  document.getElementById('nav-'+v).classList.add('on');
   if(v==='stats')renderStats();
   if(v==='settings')initSettings();
 }
 
+/* ─── STATS ─── */
 function renderStats(){
   const done=hikes.filter(h=>isDone(h.id));
   const km=done.reduce((s,h)=>s+(h.distance_km||0),0);
-  const el=done.reduce((s,h)=>s+(h.elevation_m||0),0);
+  const el=done.reduce((s,h)=>s+(h.elevation_gain_m||h.elevation_m||0),0);
   const hr=done.reduce((s,h)=>s+(h.typical_duration_hours||0),0);
   document.getElementById('shg').innerHTML=`
     <div class="sg-s"><div class="sg-v">${done.length}</div><div class="sg-l">Wanderungen</div></div>
-    <div class="sg-s"><div class="sg-v">${Math.round(km)}</div><div class="sg-l">km gesamt</div></div>
-    <div class="sg-s"><div class="sg-v">${Math.round(el/1000)}k</div><div class="sg-l">m Höhe</div></div>
+    <div class="sg-s"><div class="sg-v">${Math.round(km)}</div><div class="sg-l">km total</div></div>
+    <div class="sg-s"><div class="sg-v">${Math.round(el/1000)}k</div><div class="sg-l">m Aufstieg</div></div>
     <div class="sg-s"><div class="sg-v">${Math.round(hr)}</div><div class="sg-l">Stunden</div></div>`;
   const dc={easy:0,medium:0,hard:0,expert:0};
   done.forEach(h=>{if(dc[h.difficulty]!==undefined)dc[h.difficulty]++});
   const maxD=Math.max(...Object.values(dc),1);
   document.getElementById('dchart').innerHTML=Object.entries(dc).map(([d,n])=>
-    `<div class="br"><div class="blbl">${DL[d]}</div><div class="btrack"><div class="bfill" style="width:${Math.round(n/maxD*100)}%"></div></div><div class="bn">${n}</div></div>`).join('');
-  const cc={};done.forEach(h=>{cc[h.canton]=(cc[h.canton]||0)+1});
-  const top=Object.entries(cc).sort((a,b)=>b[1]-a[1]).slice(0,7);
+    `<div class="br"><div class="blbl">${DS[d]}</div><div class="btrack"><div class="bfill" style="width:${Math.round(n/maxD*100)}%"></div></div><div class="bn">${n}</div></div>`).join('');
+  const cc={};done.forEach(h=>{if(h.canton)cc[h.canton]=(cc[h.canton]||0)+1});
+  const top=Object.entries(cc).sort((a,b)=>b[1]-a[1]).slice(0,8);
   const maxC=Math.max(...top.map(t=>t[1]),1);
   document.getElementById('cchart').innerHTML=top.map(([c,n])=>
-    `<div class="br"><div class="blbl">${c}</div><div class="btrack"><div class="bfill" style="width:${Math.round(n/maxC*100)}%"></div></div><div class="bn">${n}</div></div>`).join('');
+    `<div class="br"><div class="blbl">${c}</div><div class="btrack"><div class="bfill" style="width:${Math.round(n/maxC*100)}%"></div></div><div class="bn">${n}</div></div>`).join('')||'<div style="font-size:12px;color:var(--ink3);padding:8px 0">Noch keine Wanderungen gemacht</div>';
   const sorted=completed.slice().sort((a,b)=>new Date(b.completed_at)-new Date(a.completed_at));
   document.getElementById('hlog').innerHTML=sorted.length?sorted.map((c,i)=>{
     const h=hikes.find(x=>x.id===c.hike_id);if(!h)return'';
-    return`<div class="le"><div class="le-n">${i+1}</div><div class="le-nm">${h.name}</div><div class="le-el">${h.elevation_m.toLocaleString()}m</div><div class="le-dt">${new Date(c.completed_at).toLocaleDateString('de-CH',{day:'2-digit',month:'short',year:'numeric'})}</div></div>`;
-  }).join(''):`<div style="font-size:13px;color:var(--ink-3);padding:24px 0;text-align:center;font-style:italic">Noch keine Wanderungen eingetragen</div>`;
+    return`<div class="le"><div class="le-n">${i+1}</div><div class="le-nm">${h.name}</div><div class="le-el">${h.elevation_m?h.elevation_m.toLocaleString()+'m':''}</div><div class="le-dt">${new Date(c.completed_at).toLocaleDateString('de-CH',{day:'2-digit',month:'short',year:'numeric'})}</div></div>`;
+  }).join(''):`<div style="font-size:12px;color:var(--ink3);padding:24px 0;text-align:center;font-style:italic">Noch keine Wanderungen eingetragen</div>`;
 }
 
+/* ─── SETTINGS ─── */
 function initSettings(){
   if(!profile)return;
   document.getElementById('s-name').value=profile.display_name||'';
@@ -672,11 +912,8 @@ function initSettings(){
 }
 
 function applyAccent(c,save){
-  document.documentElement.style.setProperty('--forest',c);
-  document.querySelectorAll('.csw').forEach(s=>{
-    const isSel=ACCENTS.find(a=>a.c===c)?.n===s.title;
-    s.classList.toggle('sel',isSel);
-  });
+  document.documentElement.style.setProperty('--g',c);
+  document.querySelectorAll('.csw').forEach(s=>s.classList.toggle('sel',s.title===ACCENTS.find(a=>a.c===c)?.n));
   if(save&&profile){sb.from('profiles').update({ui_accent_color:c}).eq('id',user.id);profile.ui_accent_color=c}
 }
 
@@ -685,15 +922,15 @@ async function saveProfile(){
   if(!name){toast('Name darf nicht leer sein');return}
   await sb.from('profiles').update({display_name:name,updated_at:new Date().toISOString()}).eq('id',user.id);
   profile.display_name=name;
-  const init=name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  document.getElementById('user-av').textContent=init;
-  document.getElementById('user-nm').textContent=name;
+  document.getElementById('uav').textContent=name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('unm').textContent=name;
   toast('Profil gespeichert ✓');
 }
 
+/* ─── TOAST ─── */
 function toast(msg,d=2800){
   const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);
+  t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),d);
 }
 </script>
 </body>
