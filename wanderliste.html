@@ -21,13 +21,19 @@
   --hdr:56px;--panel:360px;--det:380px;
   --shadow:0 4px 24px rgba(15,14,11,.12);
 }
-html,body{height:100%;overflow:hidden;font-family:'Instrument Sans',sans-serif;background:var(--paper);color:var(--ink)}
-::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--line2);border-radius:2px}
+html,body{height:100%;font-family:'Instrument Sans',sans-serif;background:var(--paper);color:var(--ink)}
 
-/* LOGIN */
-#login{position:fixed;inset:0;z-index:9999;display:flex}
+/* ── LOADING SPLASH ── */
+#splash{position:fixed;inset:0;background:var(--ink);display:flex;align-items:center;justify-content:center;z-index:99999;transition:opacity .3s}
+#splash.hide{opacity:0;pointer-events:none}
+.splash-logo{font-family:'Playfair Display',serif;font-size:28px;color:#fff;letter-spacing:-.3px}
+.splash-logo em{font-style:italic;color:#a8c8b4}
+
+/* ── LOGIN ── */
+#login{position:fixed;inset:0;z-index:9999;display:none;align-items:stretch}
+#login.show{display:flex}
 .ll{flex:1;background:var(--ink);position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:52px}
-.ll-bg{position:absolute;inset:0;font-family:'Playfair Display',serif;font-size:clamp(100px,16vw,220px);font-weight:700;color:rgba(255,255,255,0.025);line-height:.9;user-select:none;letter-spacing:-6px;display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.ll-bg{position:absolute;inset:0;font-family:'Playfair Display',serif;font-size:clamp(100px,16vw,220px);font-weight:700;color:rgba(255,255,255,.025);line-height:.9;user-select:none;letter-spacing:-6px;display:flex;align-items:center;justify-content:center;white-space:nowrap}
 .ll-c{position:relative}
 .ll-eye{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(168,200,180,.55);margin-bottom:14px;font-weight:500}
 .ll-h{font-family:'Playfair Display',serif;font-size:clamp(38px,5.5vw,60px);color:#fff;line-height:1.05;letter-spacing:-1.5px;margin-bottom:10px}
@@ -43,13 +49,15 @@ html,body{height:100%;overflow:hidden;font-family:'Instrument Sans',sans-serif;b
 .linp:focus{border-color:var(--gl);box-shadow:0 0 0 3px rgba(61,122,82,.1)}
 .lbtn{width:100%;padding:13px;background:var(--g);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;letter-spacing:.3px;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:background .2s;margin-top:4px}
 .lbtn:hover{background:var(--gl)}
+.lbtn:disabled{opacity:.6;cursor:not-allowed}
 .lerr{font-size:12px;color:var(--danger);margin-top:8px;min-height:16px;text-align:center}
 .lnote{font-size:11px;color:var(--ink3);margin-top:22px;text-align:center;opacity:.65;line-height:1.55}
 
-/* APP */
-#app{display:none;height:100vh;flex-direction:column}
+/* ── APP ── */
+#app{display:none;height:100vh;flex-direction:column;overflow:hidden}
+#app.show{display:flex}
 
-/* HEADER */
+/* ── HEADER ── */
 header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;padding:0 18px;flex-shrink:0;z-index:500;gap:0}
 .logo{font-family:'Playfair Display',serif;font-size:19px;color:#fff;letter-spacing:-.3px;padding-right:20px;border-right:1px solid rgba(255,255,255,.1);margin-right:16px;white-space:nowrap}
 .logo em{font-style:italic;color:#a8c8b4}
@@ -67,25 +75,23 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
 .av{width:24px;height:24px;border-radius:50%;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
 .uname{font-size:12px;color:rgba(255,255,255,.65);font-weight:500}
 
-/* VIEWS */
+/* ── VIEWS ── */
 .view{display:none;flex:1;overflow:hidden}
 .view.on{display:flex;animation:vi .2s ease}
 @keyframes vi{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
 
-/* MAP */
+/* ── MAP ── */
 #map-view{flex-direction:row}
 #map{flex:1;z-index:0}
 .leaflet-control-attribution{display:none}
 
-/* Stamen Toner style = monochrome map tiles */
-
-/* SIDE PANEL */
+/* ── SIDE PANEL ── */
 .sp{width:var(--panel);background:var(--paper);border-left:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
 .sp-hd{padding:16px 16px 10px;border-bottom:1px solid var(--line);flex-shrink:0}
 .sp-top{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .sp-title{font-family:'Playfair Display',serif;font-size:16px;color:var(--ink);flex:1}
 .sp-cnt{font-size:10px;background:var(--g);color:#fff;padding:2px 8px;border-radius:10px;font-weight:600;letter-spacing:.3px}
-.add-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;background:var(--gp);border:1px solid var(--gll);color:var(--g);font-size:11px;font-weight:600;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:all .15s;letter-spacing:.2px}
+.add-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;background:var(--gp);border:1px solid var(--gll);color:var(--g);font-size:11px;font-weight:600;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:all .15s}
 .add-btn:hover{background:var(--gll)}
 .add-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
 .sw{position:relative;margin-bottom:8px}
@@ -97,7 +103,7 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
 .fc:hover{border-color:var(--gl);color:var(--g)}
 .fc.on{background:var(--g);color:#fff;border-color:var(--g)}
 .hlist{flex:1;overflow-y:auto;padding:6px}
-.hi{padding:11px 13px;border-radius:9px;cursor:pointer;transition:all .15s;border:1px solid transparent;margin-bottom:2px;position:relative}
+.hi{padding:11px 13px;border-radius:9px;cursor:pointer;transition:all .15s;border:1px solid transparent;margin-bottom:2px}
 .hi:hover{background:var(--paper2);border-color:var(--line)}
 .hi.done{background:var(--gp);border-color:var(--gll)}
 .hi-r1{display:flex;align-items:flex-start;gap:8px;margin-bottom:3px}
@@ -109,20 +115,15 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
 .hi.done .hi-tick svg{display:block}
 .hi-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .hi-elev,.hi-can{font-size:11px;color:var(--ink3)}
-.hi-custom{font-size:10px;color:var(--g);font-weight:600;letter-spacing:.3px}
-.db{padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;letter-spacing:.1px}
+.hi-custom{font-size:10px;color:var(--g);font-weight:600}
+.db{padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600}
 .db-easy{background:#d4edd9;color:#1e6630}
 .db-medium{background:#fdefd3;color:#7a5a10}
 .db-hard{background:#fdddd3;color:#7a3010}
 .db-expert{background:#ead3f0;color:#5a1080}
 
-/* DETAIL PANEL */
-#det{
-  position:absolute;right:var(--panel);top:var(--hdr);bottom:0;
-  width:var(--det);background:var(--paper);border-left:1px solid var(--line);
-  z-index:200;overflow-y:auto;display:none;flex-direction:column;
-  box-shadow:-6px 0 24px rgba(15,14,11,.08);
-}
+/* ── DETAIL ── */
+#det{position:absolute;right:var(--panel);top:var(--hdr);bottom:0;width:var(--det);background:var(--paper);border-left:1px solid var(--line);z-index:200;overflow-y:auto;display:none;flex-direction:column;box-shadow:-6px 0 24px rgba(15,14,11,.08)}
 #det.on{display:flex}
 .dh{height:190px;background:var(--ink2);position:relative;overflow:hidden;flex-shrink:0}
 .dh-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:linear-gradient(160deg,#1a1a18,#3a3830)}
@@ -134,38 +135,28 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
 .dh-x svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round}
 .dh-ov{position:absolute;bottom:0;left:0;right:0;padding:14px 18px}
 .dh-nm{font-family:'Playfair Display',serif;font-size:21px;color:#fff;font-weight:500;letter-spacing:-.3px;line-height:1.1;margin-bottom:2px}
-.dh-loc{font-size:11px;color:rgba(255,255,255,.52);letter-spacing:.2px}
+.dh-loc{font-size:11px;color:rgba(255,255,255,.52)}
 .dbody{padding:18px;flex:1}
-
-/* Stats row */
-.dstats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px}
+.dstats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
 .dsb{background:var(--paper2);border:1px solid var(--line);border-radius:9px;padding:10px 8px;text-align:center}
 .dsb-v{font-family:'Playfair Display',serif;font-size:18px;color:var(--ink);line-height:1}
 .dsb-l{font-size:9px;color:var(--ink3);margin-top:3px;letter-spacing:.2px;text-transform:uppercase}
-
-/* Section heads */
 .sh{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600;color:var(--ink3);margin-bottom:8px;display:flex;align-items:center;gap:8px}
 .sh::after{content:'';flex:1;height:1px;background:var(--line)}
-
-/* Info boxes */
 .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px}
 .info-box{background:#fff;border:1px solid var(--line);border-radius:9px;padding:11px 13px}
 .info-box.full{grid-column:1/-1}
 .info-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;color:var(--ink3);margin-bottom:5px;display:flex;align-items:center;gap:5px}
 .info-lbl svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.info-val{font-size:12px;color:var(--ink2);line-height:1.5;font-weight:400}
-.ext-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--g);font-weight:500;text-decoration:none;margin-top:6px}
+.info-val{font-size:12px;color:var(--ink2);line-height:1.55}
+.ext-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--g);font-weight:500;text-decoration:none;margin-top:5px}
 .ext-link:hover{text-decoration:underline}
 .ext-link svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-
-/* Actions */
 .dactions{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
-.bp{padding:11px;border-radius:8px;border:none;background:var(--g);color:#fff;font-size:12px;font-weight:500;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:background .2s;letter-spacing:.2px}
+.bp{padding:11px;border-radius:8px;border:none;background:var(--g);color:#fff;font-size:12px;font-weight:500;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:background .2s}
 .bp:hover{background:var(--gl)}
 .bd{padding:11px;border-radius:8px;border:1px solid rgba(122,45,45,.3);background:transparent;color:var(--danger);font-size:12px;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:all .15s}
 .bd:hover{background:var(--dangerp)}
-
-/* Media */
 .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:12px}
 .mth{aspect-ratio:1;border-radius:7px;overflow:hidden;background:var(--paper3);cursor:pointer}
 .mth img,.mth video{width:100%;height:100%;object-fit:cover}
@@ -175,20 +166,20 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
 .upz svg{width:24px;height:24px;stroke:var(--ink3);fill:none;stroke-width:1.5;margin-bottom:6px}
 .upz-t{font-size:11px;color:var(--ink3)}
 
-/* STATS VIEW */
+/* ── STATS ── */
 #stats-view{flex-direction:column;overflow-y:auto;background:var(--paper2)}
 .si{max-width:900px;width:100%;margin:0 auto;padding:32px}
 .shero{background:var(--ink);border-radius:18px;padding:32px;margin-bottom:24px;position:relative;overflow:hidden}
 .shero-bg{position:absolute;right:-10px;top:-10px;font-family:'Playfair Display',serif;font-size:160px;font-weight:700;color:rgba(255,255,255,.028);line-height:1;user-select:none;letter-spacing:-5px}
 .shero-eye{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(200,222,206,.5);margin-bottom:10px;font-weight:500}
 .shero-t{font-family:'Playfair Display',serif;font-size:32px;color:#fff;font-weight:400;letter-spacing:-.5px;margin-bottom:22px}
-.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;position:relative}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 .sg-s{border-top:1px solid rgba(255,255,255,.12);padding-top:14px}
 .sg-v{font-family:'Playfair Display',serif;font-size:34px;color:#fff;line-height:1}
-.sg-l{font-size:10px;color:rgba(255,255,255,.38);margin-top:4px;letter-spacing:.3px;text-transform:uppercase}
+.sg-l{font-size:10px;color:rgba(255,255,255,.38);margin-top:4px;text-transform:uppercase;letter-spacing:.3px}
 .sg2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 .sc{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px}
-.sc-t{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:16px;letter-spacing:.1px}
+.sc-t{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:16px}
 .br{display:flex;align-items:center;gap:9px;margin-bottom:8px}
 .blbl{font-size:11px;color:var(--ink3);width:68px;text-align:right;flex-shrink:0}
 .btrack{flex:1;height:5px;background:var(--paper3);border-radius:3px;overflow:hidden}
@@ -202,7 +193,7 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
 .le-el{font-size:11px;color:var(--g);font-weight:600}
 .le-dt{font-size:10px;color:var(--ink3)}
 
-/* SETTINGS */
+/* ── SETTINGS ── */
 #settings-view{flex-direction:column;overflow-y:auto;background:var(--paper2);align-items:center;padding:32px 24px}
 .setc{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px;max-width:520px;width:100%;margin-bottom:14px}
 .set-t{font-family:'Playfair Display',serif;font-size:17px;color:var(--ink);margin-bottom:4px}
@@ -220,7 +211,7 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
 .slo{padding:10px 22px;background:transparent;color:var(--danger);border:1px solid rgba(122,45,45,.3);border-radius:7px;font-size:13px;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:all .15s}
 .slo:hover{background:var(--dangerp)}
 
-/* MODALS */
+/* ── MODALS ── */
 .mbg{position:fixed;inset:0;background:rgba(15,14,11,.55);backdrop-filter:blur(4px);z-index:800;display:none;align-items:center;justify-content:center}
 .mbg.on{display:flex}
 .modal{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px;width:440px;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow);animation:mi .22s cubic-bezier(.16,1,.3,1)}
@@ -237,35 +228,36 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
 .mcan:hover{background:var(--paper2)}
 .mok{padding:9px 22px;background:var(--g);color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:500;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:background .15s}
 .mok:hover{background:var(--gl)}
-
-/* Form grid inside modal */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .form-grid .full{grid-column:1/-1}
 .form-sel{width:100%;padding:10px 13px;border:1px solid var(--line);background:var(--paper2);border-radius:7px;font-size:13px;font-family:'Instrument Sans',sans-serif;color:var(--ink);outline:none;margin-bottom:13px;transition:all .2s}
 .form-sel:focus{border-color:var(--gl)}
 
-/* MAP MARKERS — monochrome dots */
-.mpin{width:20px;height:20px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.35);cursor:pointer;transition:transform .15s}
-.mpin:hover{transform:scale(1.15)}
-.mpin-done{background:#2d5a3d!important}
-.mpin-custom{border-style:dashed!important}
+/* ── MAP MARKERS ── */
+.mpin{border-radius:50%;border:2.5px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.35);cursor:pointer;transition:transform .15s}
+.mpin:hover{transform:scale(1.2)}
 .leaflet-popup-content-wrapper{border-radius:11px;box-shadow:0 4px 20px rgba(15,14,11,.18);border:1px solid var(--line);padding:0;overflow:hidden}
 .leaflet-popup-content{margin:0;width:auto!important}
 .pop{padding:13px 15px;cursor:pointer;min-width:160px;background:#fff}
 .pop-n{font-family:'Playfair Display',serif;font-size:14px;margin-bottom:2px;color:var(--ink)}
 .pop-m{font-size:11px;color:var(--ink3)}
-.pop-done{display:inline-block;margin-top:5px;font-size:10px;letter-spacing:.4px;background:var(--gp);color:var(--g);padding:2px 7px;border-radius:9px;font-weight:600}
-.pop-custom{display:inline-block;margin-top:5px;font-size:10px;letter-spacing:.4px;background:#fff3e0;color:#8a5010;padding:2px 7px;border-radius:9px;font-weight:600}
+.pop-done{display:inline-block;margin-top:5px;font-size:10px;background:var(--gp);color:var(--g);padding:2px 7px;border-radius:9px;font-weight:600}
+.pop-custom{display:inline-block;margin-top:5px;font-size:10px;background:#fff3e0;color:#8a5010;padding:2px 7px;border-radius:9px;font-weight:600}
 .leaflet-popup-tip-container{display:none}
 .ydot{width:13px;height:13px;border-radius:50%;background:#4a90d9;border:3px solid #fff;box-shadow:0 0 0 3px rgba(74,144,217,.28);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(74,144,217,.28)}50%{box-shadow:0 0 0 6px rgba(74,144,217,.1)}}
 
-/* TOAST */
-.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(6px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:40px;font-size:12px;font-weight:500;z-index:9998;opacity:0;transition:all .28s cubic-bezier(.16,1,.3,1);pointer-events:none;letter-spacing:.2px;box-shadow:0 6px 20px rgba(0,0,0,.28)}
+/* ── TOAST ── */
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(6px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:40px;font-size:12px;font-weight:500;z-index:9998;opacity:0;transition:all .28s cubic-bezier(.16,1,.3,1);pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.28)}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--line2);border-radius:2px}
 </style>
 </head>
 <body>
+
+<!-- SPLASH -->
+<div id="splash"><div class="splash-logo">Wander<em>liste</em></div></div>
 
 <!-- LOGIN -->
 <div id="login">
@@ -275,7 +267,7 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
       <div class="ll-eye">Private Wanderliste</div>
       <div class="ll-h">Unsere<br><em>Berge</em>,<br>unsere Touren.</div>
       <div class="ll-hr"></div>
-      <div class="ll-s">Jede Wanderung, jeder Gipfel, jede Erinnerung — für uns zwei.</div>
+      <div class="ll-s">Jede Wanderung, jeder Gipfel — für uns zwei.</div>
     </div>
   </div>
   <div class="lr">
@@ -288,7 +280,7 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
     <input class="linp" id="li-em" type="email" placeholder="name@email.ch" autocomplete="email">
     <label class="lbl">Passwort</label>
     <input class="linp" id="li-pw" type="password" placeholder="••••••••" autocomplete="current-password">
-    <button class="lbtn" id="li-btn">Anmelden</button>
+    <button class="lbtn" id="li-btn" onclick="doLogin()">Anmelden</button>
     <div class="lerr" id="li-err"></div>
     <div class="lnote">Kein Konto erstellen möglich — nur eingeladene Nutzer</div>
   </div>
@@ -310,7 +302,7 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
       </button>
     </nav>
     <div class="hr">
-      <button class="locbtn" title="Meine Position" onclick="locUser()">
+      <button class="locbtn" onclick="locUser()">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7"/></svg>
       </button>
       <div class="upill">
@@ -320,15 +312,13 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
     </div>
   </header>
 
-  <!-- MAP VIEW -->
   <div class="view on" id="map-view">
     <div id="map"></div>
 
-    <!-- DETAIL PANEL -->
     <div id="det">
-      <div class="dh" id="dh">
-        <div class="dh-ph" id="dh-ph">
-          <svg viewBox="0 0 48 48"><path d="M4 40L14 20L22 32L30 18L44 40z"/><path d="M14 20L18 26" opacity=".4"/></svg>
+      <div class="dh">
+        <div class="dh-ph">
+          <svg viewBox="0 0 48 48"><path d="M4 40L14 20L22 32L30 18L44 40z"/></svg>
           <span>Kein Foto vorhanden</span>
         </div>
         <div class="dh-grad"></div>
@@ -342,18 +332,14 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
       </div>
       <div class="dbody">
         <div class="dstats" id="dstats"></div>
-        <div id="ddiff" style="margin-bottom:14px;display:flex;gap:6px;align-items:center"></div>
+        <div id="ddiff" style="margin-bottom:14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap"></div>
         <div class="dactions" id="dact"></div>
-
         <div class="sh" style="margin-top:2px">Startpunkt & Anreise</div>
-        <div class="info-grid" id="d-info-start"></div>
-
+        <div class="info-grid" id="d-start"></div>
         <div class="sh" style="margin-top:4px">Route</div>
-        <div class="info-grid" id="d-info-route"></div>
-
-        <div class="sh" style="margin-top:4px" id="d-media-head" style="display:none">Unsere Fotos</div>
+        <div class="info-grid" id="d-route"></div>
+        <div class="sh" id="d-mhead" style="display:none;margin-top:4px">Unsere Fotos</div>
         <div class="mgrid" id="d-mgrid"></div>
-
         <div id="d-upload" style="display:none;margin-top:2px">
           <div class="sh">Medien hochladen</div>
           <label class="upz">
@@ -365,7 +351,6 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
       </div>
     </div>
 
-    <!-- SIDE LIST -->
     <div class="sp">
       <div class="sp-hd">
         <div class="sp-top">
@@ -378,7 +363,7 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
         </div>
         <div class="sw">
           <svg class="swico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input class="sinp" id="hsearch" placeholder="Berg, Kanton oder Region…" oninput="fH()">
+          <input class="sinp" id="hsearch" placeholder="Berg, Kanton, Region…" oninput="fH()">
         </div>
         <div class="frow">
           <div class="fc on" data-d="all" onclick="sDF(this)">Alle</div>
@@ -394,7 +379,6 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
     </div>
   </div>
 
-  <!-- STATS -->
   <div class="view" id="stats-view">
     <div class="si">
       <div class="shero">
@@ -411,7 +395,6 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
     </div>
   </div>
 
-  <!-- SETTINGS -->
   <div class="view" id="settings-view">
     <div class="setc">
       <div class="set-t">Mein Profil</div>
@@ -459,39 +442,18 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
 <div class="mbg" id="modal-add">
   <div class="modal wide">
     <div class="mt">Eigene Wanderung erfassen</div>
-    <div class="ms">Trage deine Wanderung manuell ein</div>
+    <div class="ms">Klicke zuerst auf die Karte um die Position zu setzen, dann fülle das Formular aus</div>
     <div class="form-grid">
-      <div class="full">
-        <label class="fl">Name der Wanderung *</label>
-        <input class="fi" id="c-name" type="text" placeholder="z.B. Hausstock via Fridolinshütte">
-      </div>
-      <div>
-        <label class="fl">Kanton</label>
-        <input class="fi" id="c-canton" type="text" placeholder="z.B. GL">
-      </div>
-      <div>
-        <label class="fl">Region</label>
-        <input class="fi" id="c-region" type="text" placeholder="z.B. Glarner Alpen">
-      </div>
-      <div>
-        <label class="fl">Gipfelhöhe (m)</label>
-        <input class="fi" id="c-elev" type="number" placeholder="z.B. 2500">
-      </div>
-      <div>
-        <label class="fl">Höhenmeter (Aufstieg)</label>
-        <input class="fi" id="c-gain" type="number" placeholder="z.B. 1200">
-      </div>
-      <div>
-        <label class="fl">Distanz (km)</label>
-        <input class="fi" id="c-km" type="number" step="0.1" placeholder="z.B. 12.5">
-      </div>
-      <div>
-        <label class="fl">Dauer (Stunden)</label>
-        <input class="fi" id="c-hours" type="number" step="0.5" placeholder="z.B. 5.5">
-      </div>
+      <div class="full"><label class="fl">Name *</label><input class="fi" id="c-name" type="text" placeholder="z.B. Hausstock via Fridolinshütte"></div>
+      <div><label class="fl">Kanton</label><input class="fi" id="c-canton" type="text" placeholder="z.B. GL"></div>
+      <div><label class="fl">Region</label><input class="fi" id="c-region" type="text" placeholder="z.B. Glarner Alpen"></div>
+      <div><label class="fl">Gipfelhöhe (m)</label><input class="fi" id="c-elev" type="number" placeholder="2500"></div>
+      <div><label class="fl">Höhenmeter Aufstieg</label><input class="fi" id="c-gain" type="number" placeholder="1200"></div>
+      <div><label class="fl">Distanz (km)</label><input class="fi" id="c-km" type="number" step="0.1" placeholder="12.5"></div>
+      <div><label class="fl">Dauer (Stunden)</label><input class="fi" id="c-hours" type="number" step="0.5" placeholder="5.5"></div>
       <div>
         <label class="fl">Schwierigkeit</label>
-        <select class="form-sel fi" id="c-diff">
+        <select class="fi form-sel" id="c-diff" style="margin-bottom:13px">
           <option value="easy">Leicht (T1–T2)</option>
           <option value="medium" selected>Mittel (T3)</option>
           <option value="hard">Schwer (T4)</option>
@@ -500,53 +462,31 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
       </div>
       <div>
         <label class="fl">Tourentyp</label>
-        <select class="form-sel fi" id="c-type">
+        <select class="fi form-sel" id="c-type" style="margin-bottom:13px">
           <option value="Rundtour">Rundtour</option>
           <option value="Traverse">Traverse / Überschreitung</option>
-          <option value="Aufstieg-Abstieg">Aufstieg & Abstieg gleicher Weg</option>
+          <option value="Aufstieg-Abstieg">Gleicher Auf-/Abstieg</option>
           <option value="Hüttentour">Hüttentour</option>
         </select>
       </div>
-      <div>
-        <label class="fl">Beste Saison</label>
-        <input class="fi" id="c-season" type="text" placeholder="z.B. Juni–Oktober">
-      </div>
+      <div class="full"><label class="fl">Beste Saison</label><input class="fi" id="c-season" type="text" placeholder="z.B. Juni–Oktober"></div>
+      <div class="full"><label class="fl">Startpunkt</label><input class="fi" id="c-start" type="text" placeholder="z.B. Parkplatz Elm, Talstation"></div>
+      <div class="full"><label class="fl">Parkplatz-Info</label><input class="fi" id="c-parking" type="text" placeholder="z.B. Grosser Parkplatz, kostenlos"></div>
+      <div class="full"><label class="fl">Öffentlicher Verkehr</label><input class="fi" id="c-pt" type="text" placeholder="z.B. Bus ab Glarus nach Elm"></div>
+      <div class="full"><label class="fl">Beschreibung</label><textarea class="fi" id="c-desc" rows="2" placeholder="Kurzbeschreibung…" style="resize:none"></textarea></div>
+      <div class="full"><label class="fl">Routenverlauf</label><textarea class="fi" id="c-route" rows="3" placeholder="Detaillierter Wegverlauf…" style="resize:none"></textarea></div>
       <div class="full">
-        <label class="fl">Startpunkt</label>
-        <input class="fi" id="c-start" type="text" placeholder="z.B. Parkplatz Elm, Talstation">
-      </div>
-      <div class="full">
-        <label class="fl">Parkplatz-Info</label>
-        <input class="fi" id="c-parking" type="text" placeholder="z.B. Grosser Parkplatz, kostenlos">
-      </div>
-      <div class="full">
-        <label class="fl">Öffentliche Verkehrsmittel</label>
-        <input class="fi" id="c-pt" type="text" placeholder="z.B. Bus ab Glarus nach Elm">
-      </div>
-      <div class="full">
-        <label class="fl">Beschreibung</label>
-        <textarea class="fi" id="c-desc" rows="2" placeholder="Kurzbeschreibung der Wanderung…" style="resize:none"></textarea>
-      </div>
-      <div class="full">
-        <label class="fl">Routenbeschreibung</label>
-        <textarea class="fi" id="c-route" rows="3" placeholder="Detaillierter Routenverlauf…" style="resize:none"></textarea>
-      </div>
-      <div class="full">
-        <label class="fl">Koordinaten Gipfel (Lat, Lng) — Klicke auf Karte oder manuell eingeben</label>
+        <label class="fl">Koordinaten (Lat / Lng) — oder Karte anklicken</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <input class="fi" id="c-lat" type="number" step="0.0001" placeholder="z.B. 46.8068" style="margin-bottom:0">
-          <input class="fi" id="c-lng" type="number" step="0.0001" placeholder="z.B. 8.9139" style="margin-bottom:0">
+          <input class="fi" id="c-lat" type="number" step="0.0001" placeholder="47.1234" style="margin-bottom:0">
+          <input class="fi" id="c-lng" type="number" step="0.0001" placeholder="9.1234" style="margin-bottom:0">
         </div>
-        <div style="font-size:11px;color:var(--g);margin-top:6px">💡 Tipp: Karte auf den Gipfel klicken, dann Koordinaten werden hier eingetragen</div>
       </div>
-      <div class="full">
-        <label class="fl">Link (optional)</label>
-        <input class="fi" id="c-url" type="url" placeholder="https://www.hikr.org/…" style="margin-bottom:0">
-      </div>
+      <div class="full"><label class="fl" style="margin-top:10px">Externer Link (optional)</label><input class="fi" id="c-url" type="url" placeholder="https://www.hikr.org/…" style="margin-bottom:0"></div>
     </div>
     <div class="mfoot">
       <button class="mcan" onclick="closeModals()">Abbrechen</button>
-      <button class="mok" onclick="saveCustomHike()">Wanderung speichern</button>
+      <button class="mok" onclick="saveCustomHike()">Speichern</button>
     </div>
   </div>
 </div>
@@ -560,34 +500,66 @@ const sb=window.supabase.createClient(SU,SK);
 
 let user=null,profile=null,hikes=[],completed=[],markers={},map=null;
 let cur=null,dF='all',sQ='',sRat=0,pickMode=false;
-
 const DL={easy:'Leicht (T1–T2)',medium:'Mittel (T3)',hard:'Schwer (T4)',expert:'Experte (T5+)'};
 const DS={easy:'Leicht',medium:'Mittel',hard:'Schwer',expert:'Experte'};
-const DC={easy:'#555',medium:'#666',hard:'#444',expert:'#333'};
+const ACCENTS=[{c:'#2d5a3d',n:'Tannengrün'},{c:'#1a4d6e',n:'Bergblau'},{c:'#5a3d1e',n:'Kastanie'},{c:'#3d1a4d',n:'Veilchen'},{c:'#4d1a1a',n:'Alpenrose'},{c:'#1a4d4d',n:'Gletscherteal'}];
 
-const ACCENTS=[
-  {c:'#2d5a3d',n:'Tannengrün'},{c:'#1a4d6e',n:'Bergblau'},{c:'#5a3d1e',n:'Kastanie'},
-  {c:'#3d1a4d',n:'Veilchen'},{c:'#4d1a1a',n:'Alpenrose'},{c:'#1a4d4d',n:'Gletscherteal'},
-];
+/* ── INIT: explicit session check first ── */
+async function init(){
+  const{data:{session}}=await sb.auth.getSession();
+  hideSplash();
+  if(session){
+    await boot(session.user);
+  } else {
+    showLogin();
+  }
+  // Then listen for future changes (logout, token refresh)
+  sb.auth.onAuthStateChange(async(event,sess)=>{
+    if(event==='SIGNED_OUT'){showLogin()}
+    else if(event==='SIGNED_IN'&&sess&&!user){await boot(sess.user)}
+  });
+}
 
-/* ─── AUTH ─── */
-sb.auth.onAuthStateChange(async(_,sess)=>{if(sess)await boot(sess.user);else showLogin()});
-document.getElementById('li-btn').onclick=async()=>{
-  const e=document.getElementById('li-em').value.trim(),p=document.getElementById('li-pw').value;
+function hideSplash(){
+  const s=document.getElementById('splash');
+  s.classList.add('hide');
+  setTimeout(()=>s.style.display='none',350);
+}
+
+function showLogin(){
+  user=null;
+  document.getElementById('login').classList.add('show');
+  document.getElementById('app').classList.remove('show');
+}
+
+async function doLogin(){
+  const btn=document.getElementById('li-btn');
+  const e=document.getElementById('li-em').value.trim();
+  const p=document.getElementById('li-pw').value;
   document.getElementById('li-err').textContent='';
+  if(!e||!p){document.getElementById('li-err').textContent='Bitte E-Mail und Passwort eingeben.';return}
+  btn.disabled=true;btn.textContent='Anmelden…';
   const{error}=await sb.auth.signInWithPassword({email:e,password:p});
-  if(error)document.getElementById('li-err').textContent='Ungültige Zugangsdaten.';
-};
-document.getElementById('li-pw').onkeydown=e=>{if(e.key==='Enter')document.getElementById('li-btn').click()};
-function showLogin(){document.getElementById('login').style.display='flex';document.getElementById('app').style.display='none'}
-async function doLogout(){await sb.auth.signOut();showLogin()}
+  btn.disabled=false;btn.textContent='Anmelden';
+  if(error){
+    document.getElementById('li-err').textContent='Anmeldung fehlgeschlagen. Bitte überprüfe deine Zugangsdaten.';
+  }
+}
+
+document.getElementById('li-pw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+async function doLogout(){
+  await sb.auth.signOut();
+  // showLogin called by onAuthStateChange
+}
 
 async function boot(u){
   user=u;
-  document.getElementById('login').style.display='none';
-  document.getElementById('app').style.display='flex';
+  document.getElementById('login').classList.remove('show');
+  document.getElementById('app').classList.add('show');
   await Promise.all([loadProfile(),loadData()]);
-  initMap();initSettings();
+  if(!map)initMap();
+  initSettings();
 }
 
 async function loadProfile(){
@@ -599,45 +571,42 @@ async function loadProfile(){
   if(data.ui_accent_color)applyAccent(data.ui_accent_color);
 }
 
-/* ─── DATA ─── */
+/* ── DATA ── */
 async function loadData(){
   const[h,c]=await Promise.all([sb.from('hikes').select('*').order('name'),sb.from('completed_hikes').select('*')]);
   hikes=h.data||[];completed=c.data||[];
-  renderList();document.getElementById('spcnt').textContent=`${completed.length}/${hikes.length}`;
+  renderList();
+  document.getElementById('spcnt').textContent=`${completed.length}/${hikes.length}`;
 }
 const isDone=id=>completed.some(c=>c.hike_id===id);
 
-/* ─── MAP ─── */
+/* ── MAP ── */
 function initMap(){
-  if(map)map.remove();
-  // Monochrome CartoDB Positron — grey/white, no colour noise
   map=L.map('map',{zoomControl:false}).setView([46.85,8.3],8);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
     attribution:'© CartoDB',maxZoom:19,subdomains:'abcd'
   }).addTo(map);
   L.control.zoom({position:'bottomright'}).addTo(map);
-
-  // Click on map to pick coords for custom hike
   map.on('click',e=>{
     if(!pickMode)return;
     document.getElementById('c-lat').value=e.latlng.lat.toFixed(5);
     document.getElementById('c-lng').value=e.latlng.lng.toFixed(5);
-    toast('Koordinaten eingetragen ✓');
+    toast('Position gesetzt ✓');
   });
-
   placeMarkers();locUser();
 }
 
 function placeMarkers(){
-  Object.values(markers).forEach(m=>{try{m.remove()}catch(_){}});markers={};
+  Object.values(markers).forEach(m=>{try{m.remove()}catch(_){}});
+  markers={};
   hikes.forEach(h=>{
     const done=isDone(h.id);
-    const col=done?'#2d5a3d':'#1a1a18';
-    const size=h.elevation_m>3000?22:18;
+    const sz=h.elevation_m>=3000?22:18;
+    const bg=done?'#2d5a3d':'#1a1a18';
     const icon=L.divIcon({
       className:'',
-      html:`<div class="mpin${done?' mpin-done':''}${h.is_custom?' mpin-custom':''}" style="background:${col};width:${size}px;height:${size}px;border-width:${done?'2.5':'2'}px"></div>`,
-      iconSize:[size,size],iconAnchor:[size/2,size],popupAnchor:[0,-size-2]
+      html:`<div class="mpin" style="background:${bg};width:${sz}px;height:${sz}px;${h.is_custom?'border-style:dashed;':''}"></div>`,
+      iconSize:[sz,sz],iconAnchor:[sz/2,sz],popupAnchor:[0,-sz-2]
     });
     const m=L.marker([h.lat,h.lng],{icon}).addTo(map);
     m.bindPopup(`<div class="pop" onclick="openHike('${h.id}')">
@@ -660,14 +629,11 @@ function locUser(){
   },()=>{});
 }
 
-/* ─── LIST ─── */
+/* ── LIST ── */
 function renderList(){
   const q=sQ.toLowerCase();
   const f=hikes.filter(h=>{
-    const mq=!q||h.name.toLowerCase().includes(q)||
-      (h.canton||'').toLowerCase().includes(q)||
-      (h.region||'').toLowerCase().includes(q)||
-      (h.description||'').toLowerCase().includes(q);
+    const mq=!q||h.name.toLowerCase().includes(q)||(h.canton||'').toLowerCase().includes(q)||(h.region||'').toLowerCase().includes(q);
     const done=isDone(h.id);
     if(dF==='all')return mq;
     if(dF==='done')return mq&&done;
@@ -694,76 +660,56 @@ function renderList(){
 function fH(){sQ=document.getElementById('hsearch').value;renderList()}
 function sDF(el){document.querySelectorAll('.fc').forEach(e=>e.classList.remove('on'));el.classList.add('on');dF=el.dataset.d;renderList()}
 
-/* ─── DETAIL ─── */
+/* ── DETAIL ── */
 async function openHike(id){
   cur=hikes.find(h=>h.id===id);if(!cur)return;
-  const det=document.getElementById('det');
-  det.classList.add('on');
-
+  document.getElementById('det').classList.add('on');
   document.getElementById('dh-nm').textContent=cur.name;
   document.getElementById('dh-loc').textContent=[cur.region,cur.canton].filter(Boolean).join(' · ');
-
-  // Stats
-  document.getElementById('dstats').innerHTML=`
-    ${cur.elevation_m?`<div class="dsb"><div class="dsb-v">${cur.elevation_m.toLocaleString()}</div><div class="dsb-l">Höhe m</div></div>`:''}
-    ${cur.elevation_gain_m?`<div class="dsb"><div class="dsb-v">${cur.elevation_gain_m.toLocaleString()}</div><div class="dsb-l">Aufstieg m</div></div>`:''}
-    ${cur.distance_km?`<div class="dsb"><div class="dsb-v">${cur.distance_km}</div><div class="dsb-l">km</div></div>`:''}
-    ${cur.typical_duration_hours?`<div class="dsb"><div class="dsb-v">${cur.typical_duration_hours}</div><div class="dsb-l">Stunden</div></div>`:''}
-  `;
-
-  // Diff + trail type
-  const diffEl=document.getElementById('ddiff');
-  diffEl.innerHTML=`<span class="db db-${cur.difficulty}">${DL[cur.difficulty]||DS[cur.difficulty]}</span>`;
-  if(cur.trail_type)diffEl.innerHTML+=`<span style="font-size:11px;color:var(--ink3)">${cur.trail_type}</span>`;
-  if(cur.best_season)diffEl.innerHTML+=`<span style="font-size:11px;color:var(--ink3)">· ${cur.best_season}</span>`;
-
-  // Description
+  document.getElementById('dstats').innerHTML=[
+    cur.elevation_m&&`<div class="dsb"><div class="dsb-v">${cur.elevation_m.toLocaleString()}</div><div class="dsb-l">Höhe m</div></div>`,
+    cur.elevation_gain_m&&`<div class="dsb"><div class="dsb-v">${cur.elevation_gain_m.toLocaleString()}</div><div class="dsb-l">Aufstieg m</div></div>`,
+    cur.distance_km&&`<div class="dsb"><div class="dsb-v">${cur.distance_km}</div><div class="dsb-l">km</div></div>`,
+    cur.typical_duration_hours&&`<div class="dsb"><div class="dsb-v">${cur.typical_duration_hours}</div><div class="dsb-l">Stunden</div></div>`,
+  ].filter(Boolean).join('');
+  const diff=document.getElementById('ddiff');
+  diff.innerHTML=`<span class="db db-${cur.difficulty}">${DL[cur.difficulty]}</span>`;
+  if(cur.trail_type)diff.innerHTML+=`<span style="font-size:11px;color:var(--ink3)">${cur.trail_type}</span>`;
+  if(cur.best_season)diff.innerHTML+=`<span style="font-size:11px;color:var(--ink3)">· ${cur.best_season}</span>`;
   const done=isDone(cur.id);
-
-  // Actions
-  document.getElementById('dact').innerHTML=`
-    ${!done?`<button class="bp" onclick="openCompleteModal()">Als gemacht markieren ✓</button>`:''}
-    ${done?`<button class="bd" onclick="undoHike()">Als nicht gemacht markieren</button>`:''}
-    ${cur.is_custom&&cur.created_by===user.id?`<button class="bd" style="border-color:rgba(122,45,45,.2);font-size:11px;padding:8px" onclick="deleteCustomHike()">Wanderung löschen</button>`:''}
-  `;
-
-  // Start / Anreise info
-  document.getElementById('d-info-start').innerHTML=`
-    ${cur.description?`<div class="info-box full"><div class="info-lbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Beschreibung</div><div class="info-val">${cur.description}</div></div>`:''}
-    ${cur.start_point?`<div class="info-box"><div class="info-lbl"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Startpunkt</div><div class="info-val">${cur.start_point}</div></div>`:''}
-    ${cur.parking_info?`<div class="info-box"><div class="info-lbl"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/></svg>Parkplatz</div><div class="info-val">${cur.parking_info}</div></div>`:''}
-    ${cur.public_transport?`<div class="info-box full"><div class="info-lbl"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="M8 19l-2 2"/><path d="M18 21l-2-2"/></svg>Öffentlicher Verkehr</div><div class="info-val">${cur.public_transport}</div></div>`:''}
-  `;
-
-  // Route info
-  document.getElementById('d-info-route').innerHTML=`
-    ${cur.route_description?`<div class="info-box full"><div class="info-lbl"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Routenverlauf</div><div class="info-val">${cur.route_description}</div></div>`:''}
-    ${cur.external_url?`<div class="info-box full"><div class="info-lbl"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Mehr Infos</div><a class="ext-link" href="${cur.external_url}" target="_blank">${cur.external_url.replace(/^https?:\/\//,'').split('/')[0]}<svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></div>`:''}
-  `;
-
-  // Upload zone
+  document.getElementById('dact').innerHTML=[
+    !done&&`<button class="bp" onclick="openCompleteModal()">Als gemacht markieren ✓</button>`,
+    done&&`<button class="bd" onclick="undoHike()">Als nicht gemacht markieren</button>`,
+    (cur.is_custom&&cur.created_by===user?.id)&&`<button class="bd" style="font-size:11px;padding:8px" onclick="deleteCustomHike()">Wanderung löschen</button>`,
+  ].filter(Boolean).join('');
+  document.getElementById('d-start').innerHTML=[
+    cur.description&&`<div class="info-box full"><div class="info-lbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Beschreibung</div><div class="info-val">${cur.description}</div></div>`,
+    cur.start_point&&`<div class="info-box"><div class="info-lbl"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Startpunkt</div><div class="info-val">${cur.start_point}</div></div>`,
+    cur.parking_info&&`<div class="info-box"><div class="info-lbl"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/></svg>Parkplatz</div><div class="info-val">${cur.parking_info}</div></div>`,
+    cur.public_transport&&`<div class="info-box full"><div class="info-lbl"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="M8 19l-2 2"/><path d="M18 21l-2-2"/></svg>Öffentlicher Verkehr</div><div class="info-val">${cur.public_transport}</div></div>`,
+  ].filter(Boolean).join('')||'<div class="info-box full"><div class="info-val" style="color:var(--ink3)">Keine Anreise-Info erfasst</div></div>';
+  document.getElementById('d-route').innerHTML=[
+    cur.route_description&&`<div class="info-box full"><div class="info-lbl"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Routenverlauf</div><div class="info-val">${cur.route_description}</div></div>`,
+    cur.external_url&&`<div class="info-box full"><div class="info-lbl"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Mehr Infos</div><a class="ext-link" href="${cur.external_url}" target="_blank">${cur.external_url.replace(/^https?:\/\//,'').split('/')[0]}<svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></div>`,
+  ].filter(Boolean).join('')||'<div class="info-box full"><div class="info-val" style="color:var(--ink3)">Keine Route-Info erfasst</div></div>';
   document.getElementById('d-upload').style.display=done?'block':'none';
-
   await loadMedia(cur.id);
-  map.flyTo([cur.lat,cur.lng],12,{duration:1.2});
+  if(map)map.flyTo([cur.lat,cur.lng],12,{duration:1.2});
 }
 
 async function loadMedia(hikeId){
   const{data}=await sb.from('hike_media').select('*').eq('hike_id',hikeId).order('created_at',{ascending:false});
-  const g=document.getElementById('d-mgrid'),hd=document.getElementById('d-media-head');
-  if(data&&data.length){
+  const g=document.getElementById('d-mgrid'),hd=document.getElementById('d-mhead');
+  if(data?.length){
     hd.style.display='flex';
     g.innerHTML=data.map(m=>{
       const url=`${SU}/storage/v1/object/public/hike-media/${m.storage_path}`;
-      return m.media_type==='video'
-        ?`<div class="mth"><video src="${url}" controls></video></div>`
-        :`<div class="mth"><img src="${url}" loading="lazy" alt=""></div>`;
+      return m.media_type==='video'?`<div class="mth"><video src="${url}" controls></video></div>`:`<div class="mth"><img src="${url}" loading="lazy" alt=""></div>`;
     }).join('');
   }else{hd.style.display='none';g.innerHTML=''}
 }
 
 document.getElementById('det-x').onclick=()=>{document.getElementById('det').classList.remove('on');cur=null};
-
 document.getElementById('d-file').onchange=async function(){
   if(!cur)return;
   for(const file of Array.from(this.files)){
@@ -776,38 +722,27 @@ document.getElementById('d-file').onchange=async function(){
   await loadMedia(cur.id);toast('Medien hochgeladen ✓');this.value='';
 };
 
-/* ─── COMPLETE ─── */
+/* ── COMPLETE ── */
 function openCompleteModal(){
   document.getElementById('m-date').value=new Date().toISOString().split('T')[0];
   document.getElementById('m-notes').value='';setStar(0);
   document.getElementById('modal-complete').classList.add('on');
 }
-function closeModals(){
-  document.querySelectorAll('.mbg').forEach(m=>m.classList.remove('on'));
-  pickMode=false;
-}
+function closeModals(){document.querySelectorAll('.mbg').forEach(m=>m.classList.remove('on'));pickMode=false}
 function setStar(n){sRat=n;document.querySelectorAll('#stars .star').forEach((s,i)=>s.classList.toggle('lit',i<n))}
-
 async function confirmComplete(){
   if(!cur)return;
-  const{error}=await sb.from('completed_hikes').insert({
-    hike_id:cur.id,completed_by:user.id,
-    completed_at:document.getElementById('m-date').value,
-    rating:sRat||null,notes:document.getElementById('m-notes').value||null
-  });
+  const{error}=await sb.from('completed_hikes').insert({hike_id:cur.id,completed_by:user.id,completed_at:document.getElementById('m-date').value,rating:sRat||null,notes:document.getElementById('m-notes').value||null});
   if(error){toast('Fehler: '+error.message);return}
-  closeModals();await loadData();placeMarkers();openHike(cur.id);
-  toast(cur.name+' abgehakt ✓');
+  closeModals();await loadData();placeMarkers();openHike(cur.id);toast(cur.name+' abgehakt ✓');
 }
-
 async function undoHike(){
   if(!cur)return;
   await sb.from('completed_hikes').delete().eq('hike_id',cur.id).eq('completed_by',user.id);
   await loadData();placeMarkers();openHike(cur.id);toast('Zurückgesetzt');
 }
-
 async function deleteCustomHike(){
-  if(!cur||!cur.is_custom)return;
+  if(!cur?.is_custom)return;
   if(!confirm('Wanderung wirklich löschen?'))return;
   await sb.from('hike_media').delete().eq('hike_id',cur.id);
   await sb.from('completed_hikes').delete().eq('hike_id',cur.id);
@@ -816,54 +751,39 @@ async function deleteCustomHike(){
   await loadData();placeMarkers();toast('Wanderung gelöscht');
 }
 
-/* ─── ADD CUSTOM HIKE ─── */
+/* ── ADD CUSTOM ── */
 function openAddModal(){
-  document.querySelectorAll('#modal-add input,#modal-add textarea,#modal-add select').forEach(el=>{
-    if(el.tagName==='SELECT')el.selectedIndex=1;
-    else el.value='';
-  });
+  document.querySelectorAll('#modal-add input,#modal-add textarea').forEach(el=>el.value='');
+  document.getElementById('c-diff').value='medium';
+  document.getElementById('c-type').value='Rundtour';
   document.getElementById('modal-add').classList.add('on');
   pickMode=true;
-  toast('Klicke auf die Karte um die Position zu setzen');
+  toast('Klicke auf die Karte, um die Position zu setzen');
 }
-
 async function saveCustomHike(){
   const name=document.getElementById('c-name').value.trim();
   const lat=parseFloat(document.getElementById('c-lat').value);
   const lng=parseFloat(document.getElementById('c-lng').value);
   if(!name){toast('Name ist erforderlich');return}
-  if(isNaN(lat)||isNaN(lng)){toast('Bitte Koordinaten eingeben (Karte anklicken)');return}
-
+  if(isNaN(lat)||isNaN(lng)){toast('Bitte Koordinaten per Karten-Klick setzen');return}
   const{data,error}=await sb.from('hikes').insert({
-    name,
-    canton:document.getElementById('c-canton').value.trim()||null,
-    region:document.getElementById('c-region').value.trim()||null,
-    elevation_m:parseInt(document.getElementById('c-elev').value)||null,
-    elevation_gain_m:parseInt(document.getElementById('c-gain').value)||null,
-    distance_km:parseFloat(document.getElementById('c-km').value)||null,
-    typical_duration_hours:parseFloat(document.getElementById('c-hours').value)||null,
-    difficulty:document.getElementById('c-diff').value,
-    trail_type:document.getElementById('c-type').value,
-    best_season:document.getElementById('c-season').value.trim()||null,
-    start_point:document.getElementById('c-start').value.trim()||null,
-    parking_info:document.getElementById('c-parking').value.trim()||null,
-    public_transport:document.getElementById('c-pt').value.trim()||null,
-    description:document.getElementById('c-desc').value.trim()||null,
-    route_description:document.getElementById('c-route').value.trim()||null,
+    name,canton:document.getElementById('c-canton').value.trim()||null,region:document.getElementById('c-region').value.trim()||null,
+    elevation_m:parseInt(document.getElementById('c-elev').value)||null,elevation_gain_m:parseInt(document.getElementById('c-gain').value)||null,
+    distance_km:parseFloat(document.getElementById('c-km').value)||null,typical_duration_hours:parseFloat(document.getElementById('c-hours').value)||null,
+    difficulty:document.getElementById('c-diff').value,trail_type:document.getElementById('c-type').value,
+    best_season:document.getElementById('c-season').value.trim()||null,start_point:document.getElementById('c-start').value.trim()||null,
+    parking_info:document.getElementById('c-parking').value.trim()||null,public_transport:document.getElementById('c-pt').value.trim()||null,
+    description:document.getElementById('c-desc').value.trim()||null,route_description:document.getElementById('c-route').value.trim()||null,
     external_url:document.getElementById('c-url').value.trim()||null,
-    lat,lng,
-    is_custom:true,
-    created_by:user.id
+    lat,lng,is_custom:true,created_by:user.id
   }).select().single();
-
   if(error){toast('Fehler: '+error.message);return}
-  closeModals();pickMode=false;
-  await loadData();placeMarkers();
+  closeModals();await loadData();placeMarkers();
   toast(name+' gespeichert ✓');
   if(data)openHike(data.id);
 }
 
-/* ─── VIEWS ─── */
+/* ── VIEWS ── */
 function sw(v){
   document.querySelectorAll('.view').forEach(e=>e.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(e=>e.classList.remove('on'));
@@ -873,11 +793,11 @@ function sw(v){
   if(v==='settings')initSettings();
 }
 
-/* ─── STATS ─── */
+/* ── STATS ── */
 function renderStats(){
   const done=hikes.filter(h=>isDone(h.id));
   const km=done.reduce((s,h)=>s+(h.distance_km||0),0);
-  const el=done.reduce((s,h)=>s+(h.elevation_gain_m||h.elevation_m||0),0);
+  const el=done.reduce((s,h)=>s+(h.elevation_gain_m||0),0);
   const hr=done.reduce((s,h)=>s+(h.typical_duration_hours||0),0);
   document.getElementById('shg').innerHTML=`
     <div class="sg-s"><div class="sg-v">${done.length}</div><div class="sg-l">Wanderungen</div></div>
@@ -893,15 +813,15 @@ function renderStats(){
   const top=Object.entries(cc).sort((a,b)=>b[1]-a[1]).slice(0,8);
   const maxC=Math.max(...top.map(t=>t[1]),1);
   document.getElementById('cchart').innerHTML=top.map(([c,n])=>
-    `<div class="br"><div class="blbl">${c}</div><div class="btrack"><div class="bfill" style="width:${Math.round(n/maxC*100)}%"></div></div><div class="bn">${n}</div></div>`).join('')||'<div style="font-size:12px;color:var(--ink3);padding:8px 0">Noch keine Wanderungen gemacht</div>';
+    `<div class="br"><div class="blbl">${c}</div><div class="btrack"><div class="bfill" style="width:${Math.round(n/maxC*100)}%"></div></div><div class="bn">${n}</div></div>`).join('')||'<p style="font-size:12px;color:var(--ink3)">Noch nichts gemacht</p>';
   const sorted=completed.slice().sort((a,b)=>new Date(b.completed_at)-new Date(a.completed_at));
   document.getElementById('hlog').innerHTML=sorted.length?sorted.map((c,i)=>{
     const h=hikes.find(x=>x.id===c.hike_id);if(!h)return'';
     return`<div class="le"><div class="le-n">${i+1}</div><div class="le-nm">${h.name}</div><div class="le-el">${h.elevation_m?h.elevation_m.toLocaleString()+'m':''}</div><div class="le-dt">${new Date(c.completed_at).toLocaleDateString('de-CH',{day:'2-digit',month:'short',year:'numeric'})}</div></div>`;
-  }).join(''):`<div style="font-size:12px;color:var(--ink3);padding:24px 0;text-align:center;font-style:italic">Noch keine Wanderungen eingetragen</div>`;
+  }).join(''):`<p style="font-size:12px;color:var(--ink3);padding:20px 0;text-align:center;font-style:italic">Noch keine Wanderungen eingetragen</p>`;
 }
 
-/* ─── SETTINGS ─── */
+/* ── SETTINGS ── */
 function initSettings(){
   if(!profile)return;
   document.getElementById('s-name').value=profile.display_name||'';
@@ -910,13 +830,11 @@ function initSettings(){
   document.getElementById('crow').innerHTML=ACCENTS.map(({c,n})=>
     `<div class="csw${c===cur?' sel':''}" style="background:${c}" title="${n}" onclick="applyAccent('${c}',true)"></div>`).join('');
 }
-
 function applyAccent(c,save){
   document.documentElement.style.setProperty('--g',c);
   document.querySelectorAll('.csw').forEach(s=>s.classList.toggle('sel',s.title===ACCENTS.find(a=>a.c===c)?.n));
   if(save&&profile){sb.from('profiles').update({ui_accent_color:c}).eq('id',user.id);profile.ui_accent_color=c}
 }
-
 async function saveProfile(){
   const name=document.getElementById('s-name').value.trim();
   if(!name){toast('Name darf nicht leer sein');return}
@@ -927,11 +845,14 @@ async function saveProfile(){
   toast('Profil gespeichert ✓');
 }
 
-/* ─── TOAST ─── */
+/* ── TOAST ── */
 function toast(msg,d=2800){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),d);
 }
+
+/* ── START ── */
+init();
 </script>
 </body>
 </html>
