@@ -352,7 +352,7 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
 .sh-eye{font-family:var(--f-mono);font-size:var(--t-micro);letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);margin-bottom:14px;font-weight:500}
 .sh-t{font-family:var(--f-serif);font-size:var(--t-display);color:var(--ink);font-weight:500;letter-spacing:-.035em;margin-bottom:32px;line-height:.98}
 .sh-t em{font-style:italic;color:var(--g);font-weight:400}
-.sh-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0;position:relative;z-index:1;padding-top:24px;border-top:1px solid var(--hairline)}
+.sh-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;z-index:1;padding-top:24px;border-top:1px solid var(--hairline)}
 @media(max-width:600px){.sh-grid{grid-template-columns:repeat(2,1fr);gap:24px 0}}
 .sh-s{padding:0 24px;position:relative}
 .sh-s:first-child{padding-left:0}
@@ -606,7 +606,7 @@ body{font-weight:400}
     </nav>
     <div class="hright">
       <button class="hbtn" id="sat-btn" title="Satellit" onclick="toggleSat()"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M8 8h8v8H8z" opacity=".4"/><circle cx="12" cy="12" r="2"/></svg></button>
-      <button class="hbtn on" id="routes-btn" title="Routen" onclick="toggleRoutes()"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></button>
+      <button class="hbtn" id="routes-btn" title="Routen" onclick="toggleRoutes()"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></button>
       <button class="hbtn on" id="pins-btn" title="Pins anzeigen" onclick="togglePins()"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></button>
       <button class="hbtn" id="loc-btn" title="Mein Standort" onclick="locUser()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7"/></svg></button>
       <button class="hbtn" id="leg-btn" title="Legende" onclick="toggleLegend()"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg></button>
@@ -753,8 +753,6 @@ body{font-weight:400}
       </div>
       <label class="fl">Anzeigename</label><input class="fi" id="s-name" type="text">
       <label class="fl">E-Mail</label><input class="fi" id="s-email" type="email" disabled>
-      <label class="fl">Routenfarbe</label>
-      <div class="color-row" id="color-row"></div>
       <button class="ssave" onclick="saveProfile()">Profil speichern</button>
     </div>
     <div class="setc">
@@ -981,8 +979,14 @@ function initMap(){
     }
   });
   placeMarkers();renderRoutes();locUser();
-  requestAnimationFrame(()=>{map.invalidateSize();placeMarkers();renderRoutes()});
-  window.addEventListener('resize',()=>{if(map)map.invalidateSize()});
+  // Fix: force marker redraw on zoom/pan to prevent disappearing
+  map.on('zoomend moveend', function(){
+    requestAnimationFrame(function(){
+      map.eachLayer(function(layer){
+        if(layer._icon){try{layer.update();}catch(e){}}
+      });
+    });
+  });
 }
 
 function toggleSat(){satMode=!satMode;if(satMode){map.removeLayer(baseTopo);baseSat.addTo(map)}else{map.removeLayer(baseSat);baseTopo.addTo(map)};document.getElementById('sat-btn').classList.toggle('on',satMode)}
@@ -1039,7 +1043,7 @@ function renderRoutes(){
       const together=compsWithRoute.some(c=>c.together);
       if(together&&myC)color=TOGETHER_COLOR;
       else if(myC)color=profile?.route_color||'#65c0bc';
-      else{const p=getPro(compsWithRoute[0].completed_by);color=p?.route_color||'#1a4d6e';}
+      else{const p=getPro(uids[0]);color=p?.route_color||'#1a4d6e';}
       weight=4;opacity=.9;dash=null;
     }else{
       color='#999';weight=3;opacity=.5;dash='8,5';
@@ -1508,7 +1512,6 @@ function sw(v){
   document.getElementById(v+'-view').classList.add('on');
   const n=document.getElementById('nav-'+v);if(n)n.classList.add('on');
   if(v==='stats')renderStats();if(v==='settings')initSettings();
-  if(v==='map'&&map)requestAnimationFrame(()=>{map.invalidateSize();placeMarkers();renderRoutes()});
 }
 
 /* ── STATS ── */
@@ -1549,7 +1552,6 @@ function renderStats(){
     <div class="sh-s"><div class="sh-v">${filteredComp.length}</div><div class="sh-l">Begehungen</div></div>
     <div class="sh-s"><div class="sh-v">${uniqueDoneHikes.length}</div><div class="sh-l">Berge</div></div>
     <div class="sh-s"><div class="sh-v">${Math.round(km)}</div><div class="sh-l">km</div></div>
-    <div class="sh-s"><div class="sh-v">${Math.round(el).toLocaleString('de-CH')}</div><div class="sh-l">Höhenmeter</div></div>
     <div class="sh-s"><div class="sh-v">${Math.floor(time/60)}</div><div class="sh-l">Stunden</div></div>`;
   const dc={easy:0,medium:0,hard:0,expert:0};
   filteredComp.forEach(c=>{const h=hikes.find(x=>x.id===c.hike_id);const d=c.difficulty_actual||(h?.difficulty)||'medium';if(dc[d]!==undefined)dc[d]++});
