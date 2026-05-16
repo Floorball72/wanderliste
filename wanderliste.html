@@ -147,7 +147,7 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
 
 /* ── MAP ── */
 #map-view{flex-direction:row;position:relative}
-#map{flex:1;z-index:0}
+#map{flex:1;z-index:0;min-height:0}
 .leaflet-control-attribution{display:none}
 
 /* Draw toolbar */
@@ -196,7 +196,7 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
 @keyframes loc-pulse{0%{transform:scale(.6);opacity:1}100%{transform:scale(2);opacity:0}}
 
 /* Draw points hint */
-.pin-wrap{will-change:transform}
+.pin-wrap{overflow:visible}
 
 /* ── SIDE PANEL ── */
 .sp{width:var(--panel);background:var(--paper);border-left:1px solid var(--hairline);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
@@ -559,6 +559,13 @@ body{font-weight:400}
 .coord-hint{font-weight:400;letter-spacing:.01em}
 .toast{font-weight:500;letter-spacing:.005em}
 .comp-stars{letter-spacing:3px}
+
+/* Fix Leaflet marker positioning */
+.leaflet-div-icon{background:transparent!important;border:none!important;margin:0!important;padding:0!important}
+.leaflet-pane,.leaflet-top,.leaflet-bottom{z-index:auto}
+.leaflet-marker-pane{overflow:visible!important}
+
+.leaflet-marker-icon{margin:0!important}
 </style>
 </head>
 <body>
@@ -790,14 +797,6 @@ body{font-weight:400}
           <input class="fi" id="m-m" type="number" min="0" max="59" placeholder="Minuten" style="margin-bottom:0">
         </div>
       </div>
-      <div>
-        <label class="fl" style="margin-top:10px">Tatsächliche km</label>
-        <input class="fi" id="m-km" type="number" step="0.1" min="0" placeholder="z.B. 12.5" style="margin-bottom:0">
-      </div>
-      <div>
-        <label class="fl" style="margin-top:10px">Tatsächliche Höhenmeter</label>
-        <input class="fi" id="m-elev" type="number" min="0" placeholder="z.B. 1200" style="margin-bottom:0">
-      </div>
       <div class="full">
         <label class="fl" style="margin-top:10px">Bewertung</label>
         <div class="srow" id="stars"><span class="star" onclick="setStar(1)">★</span><span class="star" onclick="setStar(2)">★</span><span class="star" onclick="setStar(3)">★</span><span class="star" onclick="setStar(4)">★</span><span class="star" onclick="setStar(5)">★</span></div>
@@ -1003,10 +1002,10 @@ function placeMarkers(){
     const sz=h.elevation_m>=3000?20:16;
     const ringStyle=h.is_custom?'border-style:dashed;border-width:1.5px':'border-width:2px';
     const innerDot=done?`<div style="position:absolute;inset:4px;border-radius:50%;background:var(--paper);opacity:.95"></div>`:'';
-    const icon=L.divIcon({className:'pin-wrap',html:`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${bg};border:${ringStyle.includes('dashed')?'1.5px dashed':'2px solid'} oklch(96% 0.012 85);box-shadow:0 2px 8px oklch(19% 0.006 80 / .35),0 0 0 .5px oklch(19% 0.006 80 / .25);cursor:pointer;position:relative;transition:transform .15s var(--ease-out)">${innerDot}</div>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2+sz/4],popupAnchor:[0,-sz/2-4]});
+    const icon=L.divIcon({className:'pin-wrap',html:`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${bg};border:${ringStyle.includes('dashed')?'1.5px dashed':'2px solid'} oklch(96% 0.012 85);box-shadow:0 2px 8px oklch(19% 0.006 80 / .35),0 0 0 .5px oklch(19% 0.006 80 / .25);cursor:pointer;position:relative;transition:transform .15s var(--ease-out)">${innerDot}</div>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],popupAnchor:[0,-sz/2-2]});
     const m=L.marker([h.lat,h.lng],{icon}).addTo(map);
     const compsCount=getMyCompsForHike(h.id).length;
-    m.bindPopup(`<div class="popup-card" onclick="openHike('${h.id}')"><div class="popup-name">${h.name}</div><div class="popup-meta">${h.elevation_m?h.elevation_m.toLocaleString()+'m · ':''}${h.canton||''} · ${DS[h.difficulty]||''}</div>${done?`<div class="popup-done">${compsCount}× gelaufen</div>`:''}</div>`,{closeButton:false});
+    m.bindPopup(`<div class="popup-card" onclick="openHike('${h.id}')"><div class="popup-name">${h.name}</div><div class="popup-meta">${h.elevation_m?h.elevation_m.toLocaleString()+'m · ':''}${h.canton||''} · ${DS[h.difficulty]||''}</div><div class="popup-meta" style="font-size:10px;opacity:.5;margin-top:2px">${h.lat.toFixed(4)}, ${h.lng.toFixed(4)}</div>${done?`<div class="popup-done">${compsCount}× gelaufen</div>`:''}</div>`,{closeButton:false});
     m.on('click',()=>openHike(h.id));
     markers[h.id]=m;
   });
@@ -1245,8 +1244,6 @@ function renderDetailComps(){
       <div class="comp-entry-top">
         <span class="comp-date" style="color:${myColor}">${new Date(c.completed_at).toLocaleDateString('de-CH',{day:'2-digit',month:'long',year:'numeric'})}</span>
         ${hrs?`<span class="comp-time">${hrs}</span>`:''}
-        ${c.actual_km?`<span style="font-size:11px;color:var(--gl);font-weight:500">${c.actual_km}km</span>`:''}
-        ${c.actual_elevation_m?`<span style="font-size:11px;color:var(--gl);font-weight:500">${c.actual_elevation_m.toLocaleString()}m↑</span>`:''}
         ${rte?`<span class="comp-route-name">${rte.name}</span>`:''}
       </div>
       ${c.rating?`<div class="comp-stars">${'★'.repeat(c.rating)}${'☆'.repeat(5-c.rating)}</div>`:''}
@@ -1307,7 +1304,6 @@ function openComplModal(){
   document.getElementById('m-notes').value='';
   document.getElementById('m-diff').value='';
   document.getElementById('m-h').value='';document.getElementById('m-m').value='';
-  document.getElementById('m-km').value='';document.getElementById('m-elev').value='';
   document.getElementById('m-together').checked=false;
   setStar(0);selectedRouteId=null;
   renderRoutePicker();
@@ -1324,8 +1320,6 @@ function openEditComp(compId){
   document.getElementById('m-together').checked=c.together||false;
   if(c.duration_minutes){document.getElementById('m-h').value=Math.floor(c.duration_minutes/60);document.getElementById('m-m').value=c.duration_minutes%60}
   else{document.getElementById('m-h').value='';document.getElementById('m-m').value=''}
-  document.getElementById('m-km').value=c.actual_km||'';
-  document.getElementById('m-elev').value=c.actual_elevation_m||'';
   setStar(c.rating||0);
   selectedRouteId=c.route_id||null;
   renderRoutePicker(c.route_id);
@@ -1378,7 +1372,7 @@ function setStar(n){sRat=n;document.querySelectorAll('#stars .star').forEach((s,
 async function confirmComplete(){
   if(!cur)return;
   const h=parseInt(document.getElementById('m-h').value)||0,mn=parseInt(document.getElementById('m-m').value)||0;
-  const payload={hike_id:cur.id,completed_by:user.id,completed_at:document.getElementById('m-date').value,rating:sRat||null,notes:document.getElementById('m-notes').value||null,duration_minutes:h*60+mn||null,difficulty_actual:document.getElementById('m-diff').value||null,together:document.getElementById('m-together').checked,route_id:selectedRouteId||null,actual_km:parseFloat(document.getElementById('m-km').value)||null,actual_elevation_m:parseInt(document.getElementById('m-elev').value)||null};
+  const payload={hike_id:cur.id,completed_by:user.id,completed_at:document.getElementById('m-date').value,rating:sRat||null,notes:document.getElementById('m-notes').value||null,duration_minutes:h*60+mn||null,difficulty_actual:document.getElementById('m-diff').value||null,together:document.getElementById('m-together').checked,route_id:selectedRouteId||null};
   let err;
   if(editCompId)({error:err}=await sb.from('completed_hikes').update(payload).eq('id',editCompId));
   else({error:err}=await sb.from('completed_hikes').insert(payload));
@@ -1525,9 +1519,8 @@ function filterComps(comps){
 function renderStats(){
   const filteredComp=filterComps(myComp);
   const uniqueDoneHikes=[...new Set(filteredComp.map(c=>c.hike_id))].map(id=>hikes.find(h=>h.id===id)).filter(Boolean);
-  // Use actual values from completion if available, otherwise fall back to hike defaults
-  const km=filteredComp.reduce((s,c)=>{const h=hikes.find(x=>x.id===c.hike_id);return s+(c.actual_km||h?.distance_km||0)},0);
-  const el=filteredComp.reduce((s,c)=>{const h=hikes.find(x=>x.id===c.hike_id);return s+(c.actual_elevation_m||h?.elevation_gain_m||0)},0);
+  const km=uniqueDoneHikes.reduce((s,h)=>s+(h.distance_km||0),0);
+  const el=uniqueDoneHikes.reduce((s,h)=>s+(h.elevation_gain_m||0),0);
   const time=filteredComp.reduce((s,c)=>s+(c.duration_minutes||0),0);
   const filterLabel={alltime:'Allzeit',year:'Dieses Jahr',together:'Gemeinsam',  'together-year':'Gemeinsam dieses Jahr'}[statFilter]||'';
   document.getElementById('shg').innerHTML=`
