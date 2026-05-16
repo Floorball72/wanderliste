@@ -599,6 +599,7 @@ body{font-weight:400}
     <div class="hright">
       <button class="hbtn" id="sat-btn" title="Satellit" onclick="toggleSat()"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M8 8h8v8H8z" opacity=".4"/><circle cx="12" cy="12" r="2"/></svg></button>
       <button class="hbtn" id="routes-btn" title="Routen" onclick="toggleRoutes()"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></button>
+      <button class="hbtn on" id="pins-btn" title="Pins anzeigen" onclick="togglePins()"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></button>
       <button class="hbtn" id="loc-btn" title="Mein Standort" onclick="locUser()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7"/></svg></button>
       <button class="hbtn" id="leg-btn" title="Legende" onclick="toggleLegend()"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg></button>
       <div class="upill" onclick="sw('settings')">
@@ -697,9 +698,7 @@ body{font-weight:400}
           <div class="fc" data-d="unvisited" onclick="sDF(this)">Offen</div>
           <div class="fc" data-d="custom" onclick="sDF(this)">Eigene</div>
         </div>
-        <div class="vis-row">
-          <label class="vis-toggle"><input type="checkbox" id="show-pins" checked onchange="togglePins()">Pins zeigen</label>
-        </div>
+
       </div>
       <div class="hlist" id="hlist"></div>
     </div>
@@ -974,7 +973,11 @@ function initMap(){
 function toggleSat(){satMode=!satMode;if(satMode){map.removeLayer(baseTopo);baseSat.addTo(map)}else{map.removeLayer(baseSat);baseTopo.addTo(map)};document.getElementById('sat-btn').classList.toggle('on',satMode)}
 function toggleRoutes(){showRoutes=!showRoutes;document.getElementById('routes-btn').classList.toggle('on',showRoutes);if(showRoutes)renderRoutes();else{routeLayers.forEach(l=>{try{l.remove()}catch(_){}});routeLayers=[];placeMarkers()}}
 function toggleLegend(){const l=document.getElementById('legend');l.classList.toggle('on');document.getElementById('leg-btn').classList.toggle('on',l.classList.contains('on'))}
-function togglePins(){showPins=document.getElementById('show-pins').checked;placeMarkers()}
+function togglePins(){
+  showPins=!showPins;
+  document.getElementById('pins-btn').classList.toggle('on',showPins);
+  placeMarkers();
+}
 function toggleMobList(){mobListOpen=!mobListOpen;document.getElementById('side-panel').classList.toggle('mob-open',mobListOpen)}
 
 /* ── MARKERS ── */
@@ -1215,8 +1218,6 @@ async function openHike(id){
     cur.external_url&&`<div class="ib full"><div class="ib-l"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Mehr Infos</div><a class="ext-link" href="${cur.external_url}" target="_blank">${cur.external_url.replace(/^https?:\/\//,'').split('/')[0]}</a></div>`,
   ].filter(Boolean).join('')||'<div class="ib full"><div class="ib-v" style="color:var(--ink3);font-style:italic">Keine Route-Info</div></div>';
 
-  // Show hero image immediately (don't wait for media grid)
-  await setHeroImage(cur);
   await loadMedia(id);
   renderList();
   if(map)map.flyTo([cur.lat,cur.lng],12,{duration:1.2});
@@ -1380,64 +1381,14 @@ async function deleteComp(compId){
 }
 
 /* ── MEDIA ── */
-async function fetchAndSaveHeroImage(hike){
-  // Only fetch if no hero_image_url stored yet
-  if(hike.hero_image_url)return hike.hero_image_url;
-  try{
-    // Search Wikipedia for the hike name to get a thumbnail
-    const q=encodeURIComponent(hike.name+' Berg Schweiz');
-    const resp=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(hike.name)}`,{headers:{'User-Agent':'WanderlisteApp/1.0'}});
-    if(!resp.ok){
-      // Try German Wikipedia
-      const resp2=await fetch(`https://de.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(hike.name)}`);
-      if(!resp2.ok)return null;
-      const d2=await resp2.json();
-      const img2=d2?.thumbnail?.source?.replace(/\/\d+px-/,'/800px-')||null;
-      if(img2){await sb.from('hikes').update({hero_image_url:img2}).eq('id',hike.id);hike.hero_image_url=img2;}
-      return img2;
-    }
-    const d=await resp.json();
-    const img=d?.thumbnail?.source?.replace(/\/\d+px-/,'/800px-')||null;
-    if(img){await sb.from('hikes').update({hero_image_url:img}).eq('id',hike.id);hike.hero_image_url=img;}
-    return img;
-  }catch(e){return null;}
-}
-
-async function setHeroImage(hike){
-  const dh=document.getElementById('dh');
-  const ph=document.getElementById('dh-ph');
-  const oldImg=dh.querySelector('.dh-img');if(oldImg)oldImg.remove();
-  // Try stored URL first, then fetch from Wikipedia
-  let url=hike.hero_image_url||null;
-  if(!url)url=await fetchAndSaveHeroImage(hike);
-  if(url){
-    const img=document.createElement('img');
-    img.className='dh-img';
-    img.src=url;
-    img.alt=hike.name||'';
-    img.onerror=()=>{
-      img.remove();ph.style.display='flex';
-      // Mark as broken so we don't retry
-      sb.from('hikes').update({hero_image_url:null}).eq('id',hike.id);
-      hike.hero_image_url=null;
-    };
-    dh.insertBefore(img,dh.firstChild);
-    ph.style.display='none';
-  }else{
-    ph.style.display='flex';
-  }
-}
-
 async function loadMedia(hikeId){
   const{data}=await sb.from('hike_media').select('*').eq('hike_id',hikeId).order('created_at',{ascending:true});
   const g=document.getElementById('d-mgrid'),hd=document.getElementById('d-mhead'),dh=document.getElementById('dh');
-  const ph=document.getElementById('dh-ph');
   const oldImg=dh.querySelector('.dh-img');if(oldImg)oldImg.remove();
   if(data?.length){
-    // Eigenes Foto hat Priorität
     const img=document.createElement('img');img.className='dh-img';img.src=`${SU}/storage/v1/object/public/hike-media/${data[0].storage_path}`;img.alt='';
     dh.insertBefore(img,dh.firstChild);
-    ph.style.display='none';
+    document.getElementById('dh-ph').style.display='none';
     hd.style.display='flex';
     g.innerHTML=data.map(m=>{
       const url=`${SU}/storage/v1/object/public/hike-media/${m.storage_path}`;
@@ -1446,9 +1397,8 @@ async function loadMedia(hikeId){
         :`<div class="mth"><img src="${url}" loading="lazy" alt=""><button class="mth-del" onclick="delMedia('${m.id}','${m.storage_path}')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`;
     }).join('');
   }else{
+    document.getElementById('dh-ph').style.display='flex';
     hd.style.display='none';g.innerHTML='';
-    // Kein eigenes Foto: hero_image_url oder Wikipedia-Fetch
-    await setHeroImage(cur);
   }
 }
 async function delMedia(id,path){
