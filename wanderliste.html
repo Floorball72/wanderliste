@@ -427,7 +427,7 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
 
     <div id="draw-toolbar">
       <span class="dh" id="draw-hint">Klicke auf den Wanderweg</span>
-      <button class="dt-btn dt-undo" onclick="undoDrawPt()">↩</button>
+      <button class="dt-btn dt-undo" onclick="undoDrawPt()">Zurück</button>
       <button class="dt-btn dt-cancel" onclick="cancelDraw()">Abbrechen</button>
       <button class="dt-btn dt-save" onclick="saveDraw()">Speichern</button>
     </div>
@@ -442,7 +442,7 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
       <div id="legend-content"></div>
     </div>
 
-    <button id="mob-list-btn" onclick="toggleMobList()">☰ Wanderungen</button>
+    <button id="mob-list-btn" onclick="toggleMobList()">Wanderungen</button>
 
     <!-- DETAIL -->
     <div id="det">
@@ -453,7 +453,7 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
         </div>
         <div class="dh-grad"></div>
         <button class="dh-x" id="det-x"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-        <button class="dh-edit-btn" id="det-edit-btn" onclick="openEditModal()" style="display:none">✎ Bearbeiten</button>
+        <button class="dh-edit-btn" id="det-edit-btn" onclick="openEditModal()" style="display:none">Bearbeiten</button>
         <div class="dh-ov"><div class="dh-nm" id="dh-nm">—</div><div class="dh-loc" id="dh-loc">—</div></div>
       </div>
       <div class="dbody">
@@ -506,9 +506,9 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
           <div class="fc" data-d="medium" onclick="sDF(this)">Mittel</div>
           <div class="fc" data-d="hard" onclick="sDF(this)">Schwer</div>
           <div class="fc" data-d="expert" onclick="sDF(this)">Experte</div>
-          <div class="fc" data-d="done" onclick="sDF(this)">✓ Gemacht</div>
-          <div class="fc" data-d="unvisited" onclick="sDF(this)">○ Offen</div>
-          <div class="fc" data-d="custom" onclick="sDF(this)">⊕ Eigene</div>
+          <div class="fc" data-d="done" onclick="sDF(this)">Gemacht</div>
+          <div class="fc" data-d="unvisited" onclick="sDF(this)">Offen</div>
+          <div class="fc" data-d="custom" onclick="sDF(this)">Eigene</div>
         </div>
       </div>
       <div class="hlist" id="hlist"></div>
@@ -534,8 +534,8 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
         <div style="display:flex;gap:6px;flex-wrap:wrap;padding:10px 20px;border-bottom:1px solid var(--line);background:var(--paper)">
           <div class="stat-fc on" data-f="alltime" onclick="setSF(this)">Allzeit</div>
           <div class="stat-fc" data-f="year" onclick="setSF(this)">Dieses Jahr</div>
-          <div class="stat-fc" data-f="together" onclick="setSF(this)">🧡 Gemeinsam</div>
-          <div class="stat-fc" data-f="together-year" onclick="setSF(this)">🧡 Gemeinsam dieses Jahr</div>
+          <div class="stat-fc" data-f="together" onclick="setSF(this)">Gemeinsam</div>
+          <div class="stat-fc" data-f="together-year" onclick="setSF(this)">Gemeinsam dieses Jahr</div>
         </div>
         <div id="hlog"></div>
       </div>
@@ -660,7 +660,7 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
           <input class="fi" id="c-lat" type="number" step="0.0001" placeholder="Lat" style="margin-bottom:0">
           <input class="fi" id="c-lng" type="number" step="0.0001" placeholder="Lng" style="margin-bottom:0">
         </div>
-        <div class="coord-hint">💡 Schliesse dieses Fenster, klicke auf der Karte und öffne "Eigene" erneut — Koordinaten werden übernommen.</div>
+        <div class="coord-hint">Schliesse dieses Fenster, klicke auf der Karte und öffne "Eigene" erneut — Koordinaten werden übernommen.</div>
       </div>
       <div class="full"><label class="fl" style="margin-top:7px">Link</label><input class="fi" id="c-url" type="url" placeholder="https://…" style="margin-bottom:0"></div>
     </div>
@@ -770,7 +770,7 @@ function initMap(){
     if(document.getElementById('modal-add').classList.contains('on')){
       document.getElementById('c-lat').value=pendingCoords.lat;
       document.getElementById('c-lng').value=pendingCoords.lng;
-      toast('Position gesetzt ✓');
+      toast('Position gesetzt');
     }
   });
   placeMarkers();renderRoutes();locUser();
@@ -798,7 +798,7 @@ function placeMarkers(){
     const icon=L.divIcon({className:'',html:`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${bg};border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.28);cursor:pointer;transition:transform .15s;${h.is_custom?'border-style:dashed':''}"></div>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz],popupAnchor:[0,-sz-2]});
     const m=L.marker([h.lat,h.lng],{icon}).addTo(map);
     const compsCount=getMyCompsForHike(h.id).length;
-    m.bindPopup(`<div style="padding:12px 14px;cursor:pointer;min-width:160px;background:#fff;font-family:Montserrat,sans-serif"><div style="font-size:13.5px;margin-bottom:3px;color:#0f0e0b;font-weight:600;letter-spacing:-.01em" onclick="openHike('${h.id}')">${h.name}</div><div style="font-size:11px;color:#6a6860;font-weight:400">${h.elevation_m?h.elevation_m.toLocaleString()+'m · ':''}${h.canton||''} · ${DS[h.difficulty]||''}</div>${done?`<div style="margin-top:6px;font-size:10px;background:#eaf6f5;color:#4ea8a4;padding:2px 8px;border-radius:9px;font-weight:700;letter-spacing:.04em;display:inline-block;text-transform:uppercase">✓ ${compsCount}× gemacht</div>`:''}</div>`,{closeButton:false});
+    m.bindPopup(`<div style="padding:12px 14px;cursor:pointer;min-width:160px;background:#fff;font-family:Montserrat,sans-serif"><div style="font-size:13.5px;margin-bottom:3px;color:#0f0e0b;font-weight:600;letter-spacing:-.01em" onclick="openHike('${h.id}')">${h.name}</div><div style="font-size:11px;color:#6a6860;font-weight:400">${h.elevation_m?h.elevation_m.toLocaleString()+'m · ':''}${h.canton||''} · ${DS[h.difficulty]||''}</div>${done?`<div style="margin-top:6px;font-size:10px;background:#eaf6f5;color:#4ea8a4;padding:2px 8px;border-radius:9px;font-weight:700;letter-spacing:.04em;display:inline-block;text-transform:uppercase">${compsCount}× gemacht</div>`:''}</div>`,{closeButton:false});
     m.on('click',()=>openHike(h.id));
     markers[h.id]=m;
   });
@@ -829,7 +829,7 @@ function renderRoutes(){
       color='#999';weight=2.5;opacity=.55;dash='6,5';
     }
     const pl=L.polyline(latlngs,{color,weight,opacity,dashArray:dash,lineJoin:'round',lineCap:'round'}).addTo(map);
-    const badge=done?`<div style="margin-top:5px;font-size:10px;background:#eaf6f5;color:#4ea8a4;padding:2px 8px;border-radius:9px;font-weight:700;letter-spacing:.04em;display:inline-block;text-transform:uppercase">✓ Gelaufen</div>`:`<div style="margin-top:5px;font-size:10px;background:#f1efe9;color:#888;padding:2px 8px;border-radius:9px;font-weight:700;letter-spacing:.04em;display:inline-block;text-transform:uppercase">Geplant</div>`;
+    const badge=done?`<div style="margin-top:5px;font-size:10px;background:#eaf6f5;color:#4ea8a4;padding:2px 8px;border-radius:9px;font-weight:700;letter-spacing:.04em;display:inline-block;text-transform:uppercase">Gelaufen</div>`:`<div style="margin-top:5px;font-size:10px;background:#f1efe9;color:#888;padding:2px 8px;border-radius:9px;font-weight:700;letter-spacing:.04em;display:inline-block;text-transform:uppercase">Geplant</div>`;
     const h=hikes.find(h=>h.id===r.hike_id);
     pl.bindPopup(`<div style="padding:12px 14px;cursor:pointer;background:#fff;min-width:150px;font-family:Montserrat,sans-serif" onclick="openHike('${r.hike_id}')"><div style="font-size:13.5px;color:#0f0e0b;font-weight:600;letter-spacing:-.01em">${h?.name||'Wanderung'}</div><div style="font-size:11px;color:#888;margin-bottom:2px;font-weight:400">${r.name}</div>${badge}</div>`,{closeButton:false});
     pl.on('click',()=>openHike(r.hike_id));
@@ -861,7 +861,7 @@ function locUser(){
     locMarker=L.marker([la,lo],{icon:ico}).addTo(map);
     locMarker.bindPopup('<div style="padding:10px 14px;background:#fff;font-family:Montserrat,sans-serif"><div style="font-size:13px;font-weight:600;letter-spacing:-.01em">Du bist hier</div></div>',{closeButton:false});
     map.flyTo([la,lo],14,{duration:1.5});
-    toast('Standort gefunden ✓');
+    toast('Standort gefunden');
   },err=>{
     const m={1:'Zugriff verweigert — bitte in Browser-Einstellungen erlauben.',2:'Standort nicht verfügbar.',3:'Zeitüberschreitung.'};
     toast(m[err.code]||'Standort nicht verfügbar.');
@@ -910,7 +910,7 @@ async function saveDraw(){
   cancelDraw();
   renderRoutes();
   if(cur)renderDetailRoutes();
-  toast('Route gespeichert ✓ ('+savedPts.length+' Punkte)');
+  toast('Route gespeichert ('+savedPts.length+' Punkte)');
 }
 
 /* ── ADD ROUTE ── */
@@ -967,7 +967,7 @@ function renderList(){
         ${h.canton?`<span class="hi-sub">· ${h.canton}</span>`:''}
         <span class="db db-${h.difficulty}">${DS[h.difficulty]}</span>
         ${comps.length>1?`<span class="hi-cnt">${comps.length}×</span>`:''}
-        ${h.is_custom?'<span style="font-size:10px;color:var(--g);font-weight:600">⊕</span>':''}
+        ${h.is_custom?'<span style="font-size:9px;color:var(--gd);font-weight:700;letter-spacing:.08em;text-transform:uppercase">Eigen</span>':''}
       </div>
     </div>`;
   }).join('')||'<div style="padding:24px;text-align:center;font-size:12px;color:var(--ink3)">Keine Wanderungen gefunden</div>';
@@ -1039,10 +1039,10 @@ function renderDetailComps(){
         ${rte?`<span class="comp-route-name">${rte.name}</span>`:''}
       </div>
       ${c.rating?`<div class="comp-stars">${'★'.repeat(c.rating)}${'☆'.repeat(5-c.rating)}</div>`:''}
-      ${c.together?`<div style="font-size:11px;color:var(--amber);font-weight:500;margin-top:3px">🧡 Gemeinsam gemacht</div>`:''}
+      ${c.together?`<div style="font-size:11px;color:var(--amber);font-weight:600;margin-top:3px;letter-spacing:.01em">Gemeinsam gemacht</div>`:''}
       ${c.notes?`<div class="comp-notes">${c.notes}</div>`:''}
       <div class="comp-actions">
-        <button class="comp-edit-btn" onclick="openEditComp('${c.id}')">✎ Bearbeiten</button>
+        <button class="comp-edit-btn" onclick="openEditComp('${c.id}')">Bearbeiten</button>
         <button class="comp-del-btn" onclick="deleteComp('${c.id}')">Löschen</button>
       </div>
     </div>`;
@@ -1078,7 +1078,7 @@ function renderDetailRoutes(){
         ${r.typical_duration_hours?`<span>${r.typical_duration_hours}h</span>`:''}
       </div>
       <div class="route-card-actions">
-        <button class="rca-btn rca-draw" onclick="startDrawForRoute('${r.id}')">${hasGeo?'↺ Neu zeichnen':'✏ Route zeichnen'}</button>
+        <button class="rca-btn rca-draw" onclick="startDrawForRoute('${r.id}')">${hasGeo?'Neu zeichnen':'Route zeichnen'}</button>
         <button class="rca-btn rca-del" onclick="deleteRoute('${r.id}')">Löschen</button>
       </div>
     </div>`;
@@ -1146,7 +1146,7 @@ function renderRoutePicker(selectedId=null){
       <div style="flex:1">
         <div class="rp-name">${r.name}</div>
         ${r.description?`<div class="rp-meta">${r.description}</div>`:''}
-        ${!hasGeo?'<div class="rp-meta" style="color:var(--amber)">⚠ Noch nicht gezeichnet</div>':''}
+        ${!hasGeo?'<div class="rp-meta" style="color:var(--amber);font-weight:600">Noch nicht gezeichnet</div>':''}
       </div>
     </label>`;
   }).join('');
@@ -1170,7 +1170,7 @@ async function confirmComplete(){
   else({error:err}=await sb.from('completed_hikes').insert(payload));
   if(err){toast('Fehler: '+err.message);return}
   closeModals();await loadData();renderRoutes();placeMarkers();openHike(cur.id);
-  toast(editCompId?'Begehung aktualisiert ✓':'Begehung eingetragen ✓');
+  toast(editCompId?'Begehung aktualisiert':'Begehung eingetragen');
 }
 
 async function deleteComp(compId){
@@ -1217,7 +1217,7 @@ document.getElementById('d-file').onchange=async function(){
     if(error){toast('Fehler: '+error.message);continue}
     await sb.from('hike_media').insert({hike_id:cur.id,uploaded_by:user.id,storage_path:path,media_type:file.type.startsWith('video')?'video':'photo'});
   }
-  await loadMedia(cur.id);toast(`${this.files.length} Datei(en) hochgeladen ✓`);this.value='';
+  await loadMedia(cur.id);toast(`${this.files.length} Datei(en) hochgeladen`);this.value='';
 };
 
 /* ── ADD/EDIT HIKE ── */
@@ -1266,7 +1266,7 @@ async function saveHike(){
   else({data,error:err}=await sb.from('hikes').insert({...payload,lat,lng,is_custom:true,created_by:user.id}).select().single());
   if(err){toast('Fehler: '+err.message);return}
   closeModals();await loadData();placeMarkers();renderRoutes();
-  toast(name+(editHikeId?' aktualisiert ✓':' gespeichert ✓'));
+  toast(name+(editHikeId?' aktualisiert':' gespeichert'));
   if(data)openHike(data.id);else if(editHikeId)openHike(editHikeId);
 }
 async function deleteHike(){
@@ -1365,7 +1365,7 @@ async function saveProfile(){
   const name=document.getElementById('s-name').value.trim();if(!name){toast('Name erforderlich');return}
   const{error}=await sb.from('profiles').update({display_name:name,updated_at:new Date().toISOString()}).eq('id',user.id);
   if(error){toast('Fehler: '+error.message);return}
-  profile.display_name=name;applyProfileUI();toast('Profil gespeichert ✓');
+  profile.display_name=name;applyProfileUI();toast('Profil gespeichert');
 }
 async function changePw(){
   const p1=document.getElementById('s-pw1').value,p2=document.getElementById('s-pw2').value;
@@ -1373,7 +1373,7 @@ async function changePw(){
   if(p1!==p2){toast('Passwörter stimmen nicht überein');return}
   const{error}=await sb.auth.updateUser({password:p1});
   if(error){toast('Fehler: '+error.message);return}
-  document.getElementById('s-pw1').value='';document.getElementById('s-pw2').value='';toast('Passwort geändert ✓');
+  document.getElementById('s-pw1').value='';document.getElementById('s-pw2').value='';toast('Passwort geändert');
 }
 async function uploadAvatar(input){
   const file=input.files[0];if(!file)return;
@@ -1384,7 +1384,7 @@ async function uploadAvatar(input){
   if(e1){toast('Fehler: '+e1.message);return}
   const{error:e2}=await sb.from('profiles').update({avatar_url:path}).eq('id',user.id);
   if(e2){toast('Fehler: '+e2.message);return}
-  profile.avatar_url=path;applyProfileUI();initSettings();toast('Profilbild gespeichert ✓');
+  profile.avatar_url=path;applyProfileUI();initSettings();toast('Profilbild gespeichert');
 }
 
 /* ── TOAST ── */
