@@ -564,8 +564,9 @@ body{font-weight:400}
 .leaflet-div-icon{background:transparent!important;border:none!important;margin:0!important;padding:0!important}
 .leaflet-pane,.leaflet-top,.leaflet-bottom{z-index:auto}
 .leaflet-marker-pane{overflow:visible!important}
-
 .leaflet-marker-icon{margin:0!important}
+.leaflet-marker-pane,.leaflet-overlay-pane{will-change:transform}
+.pin-wrap{overflow:visible!important}
 </style>
 </head>
 <body>
@@ -978,6 +979,14 @@ function initMap(){
     }
   });
   placeMarkers();renderRoutes();locUser();
+  // Fix: force marker redraw on zoom/pan to prevent disappearing
+  map.on('zoomend moveend', function(){
+    requestAnimationFrame(function(){
+      map.eachLayer(function(layer){
+        if(layer._icon){try{layer.update();}catch(e){}}
+      });
+    });
+  });
 }
 
 function toggleSat(){satMode=!satMode;if(satMode){map.removeLayer(baseTopo);baseSat.addTo(map)}else{map.removeLayer(baseSat);baseTopo.addTo(map)};document.getElementById('sat-btn').classList.toggle('on',satMode)}
@@ -1528,8 +1537,15 @@ function filterComps(comps){
 function renderStats(){
   const filteredComp=filterComps(myComp);
   const uniqueDoneHikes=[...new Set(filteredComp.map(c=>c.hike_id))].map(id=>hikes.find(h=>h.id===id)).filter(Boolean);
-  const km=uniqueDoneHikes.reduce((s,h)=>s+(h.distance_km||0),0);
-  const el=uniqueDoneHikes.reduce((s,h)=>s+(h.elevation_gain_m||0),0);
+  // Summe über alle Begehungen: actual-Werte wenn vorhanden, sonst Standardwerte der Wanderung
+  const km=filteredComp.reduce((s,c)=>{
+    const h=hikes.find(x=>x.id===c.hike_id);
+    return s+(c.actual_distance_km!=null?Number(c.actual_distance_km):(h?.distance_km||0));
+  },0);
+  const el=filteredComp.reduce((s,c)=>{
+    const h=hikes.find(x=>x.id===c.hike_id);
+    return s+(c.actual_elevation_gain_m!=null?Number(c.actual_elevation_gain_m):(h?.elevation_gain_m||0));
+  },0);
   const time=filteredComp.reduce((s,c)=>s+(c.duration_minutes||0),0);
   const filterLabel={alltime:'Allzeit',year:'Dieses Jahr',together:'Gemeinsam',  'together-year':'Gemeinsam dieses Jahr'}[statFilter]||'';
   document.getElementById('shg').innerHTML=`
@@ -1551,11 +1567,14 @@ function renderStats(){
     const h=hikes.find(x=>x.id===c.hike_id);if(!h)return'';
     const rte=routes.find(r=>r.id===c.route_id);
     const t=c.duration_minutes?`${Math.floor(c.duration_minutes/60)}h${('0'+c.duration_minutes%60).slice(-2)}`:'';
+    const actDist=c.actual_distance_km!=null?c.actual_distance_km:(h.distance_km||null);
+    const actEl=c.actual_elevation_gain_m!=null?c.actual_elevation_gain_m:(h.elevation_gain_m||null);
     return`<div class="le" onclick="sw('map');setTimeout(()=>openHike('${h.id}'),300)">
       <div class="le-n">${i+1}</div>
       <div class="le-dot" style="background:${c.together?'#e67e22':color}"></div>
       <div class="le-nm">${h.name}${rte?`<span style="font-size:10px;color:var(--ink3);font-weight:400;margin-left:6px">${rte.name}</span>`:''}</div>
-      <div class="le-el">${h.elevation_m?h.elevation_m.toLocaleString()+'m':''}</div>
+      <div class="le-el">${actEl?Math.round(actEl).toLocaleString()+'hm':''}</div>
+      ${actDist?`<div class="le-dt">${actDist}km</div>`:''}
       ${t?`<div class="le-dt">${t}</div>`:''}
       <div class="le-dt">${new Date(c.completed_at).toLocaleDateString('de-CH',{day:'2-digit',month:'short',year:'numeric'})}</div>
     </div>`;
