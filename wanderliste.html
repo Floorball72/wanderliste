@@ -1045,7 +1045,7 @@ function renderRoutes(){
       const together=compsWithRoute.some(c=>c.together);
       if(together&&myC)color=TOGETHER_COLOR;
       else if(myC)color=profile?.route_color||'#65c0bc';
-      else{const p=getPro(uids[0]);color=p?.route_color||'#1a4d6e';}
+      else{const p=getPro(compsWithRoute[0].completed_by);color=p?.route_color||'#1a4d6e';}
       weight=4;opacity=.9;dash=null;
     }else{
       color='#999';weight=3;opacity=.5;dash='8,5';
