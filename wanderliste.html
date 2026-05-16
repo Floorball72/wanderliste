@@ -606,6 +606,19 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
         <textarea class="fi" id="m-notes" rows="3" placeholder="Eindrücke, Wetter…" style="resize:none;margin-bottom:0"></textarea>
       </div>
       <div class="full" style="margin-top:10px">
+        <label class="fl">Tatsächliche Werte <span style="font-weight:400;color:var(--ink3)">(leer = Standardwert)</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div>
+            <label class="fl" style="font-size:10px;margin-bottom:4px">Distanz (km)</label>
+            <input class="fi" id="m-km" type="number" step="0.1" min="0" placeholder="z.B. 12.5" style="margin-bottom:0">
+          </div>
+          <div>
+            <label class="fl" style="font-size:10px;margin-bottom:4px">Aufstieg (m)</label>
+            <input class="fi" id="m-gain" type="number" min="0" placeholder="z.B. 850" style="margin-bottom:0">
+          </div>
+        </div>
+      </div>
+      <div class="full" style="margin-top:10px">
         <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;color:var(--ink2)">
           <input type="checkbox" id="m-together" style="accent-color:var(--g)">Zusammen gemacht
         </label>
@@ -1097,6 +1110,7 @@ function openComplModal(){
   document.getElementById('m-notes').value='';
   document.getElementById('m-diff').value='';
   document.getElementById('m-h').value='';document.getElementById('m-m').value='';
+  document.getElementById('m-km').value='';document.getElementById('m-gain').value='';
   document.getElementById('m-together').checked=false;
   setStar(0);selectedRouteId=null;
   renderRoutePicker();
@@ -1113,6 +1127,8 @@ function openEditComp(compId){
   document.getElementById('m-together').checked=c.together||false;
   if(c.duration_minutes){document.getElementById('m-h').value=Math.floor(c.duration_minutes/60);document.getElementById('m-m').value=c.duration_minutes%60}
   else{document.getElementById('m-h').value='';document.getElementById('m-m').value=''}
+  document.getElementById('m-km').value=c.actual_distance_km||'';
+  document.getElementById('m-gain').value=c.actual_elevation_gain_m||'';
   setStar(c.rating||0);
   selectedRouteId=c.route_id||null;
   renderRoutePicker(c.route_id);
@@ -1165,7 +1181,9 @@ function setStar(n){sRat=n;document.querySelectorAll('#stars .star').forEach((s,
 async function confirmComplete(){
   if(!cur)return;
   const h=parseInt(document.getElementById('m-h').value)||0,mn=parseInt(document.getElementById('m-m').value)||0;
-  const payload={hike_id:cur.id,completed_by:user.id,completed_at:document.getElementById('m-date').value,rating:sRat||null,notes:document.getElementById('m-notes').value||null,duration_minutes:h*60+mn||null,difficulty_actual:document.getElementById('m-diff').value||null,together:document.getElementById('m-together').checked,route_id:selectedRouteId||null};
+  const actualKm=parseFloat(document.getElementById('m-km').value)||null;
+  const actualGain=parseInt(document.getElementById('m-gain').value)||null;
+  const payload={hike_id:cur.id,completed_by:user.id,completed_at:document.getElementById('m-date').value,rating:sRat||null,notes:document.getElementById('m-notes').value||null,duration_minutes:h*60+mn||null,difficulty_actual:document.getElementById('m-diff').value||null,together:document.getElementById('m-together').checked,route_id:selectedRouteId||null,actual_distance_km:actualKm,actual_elevation_gain_m:actualGain};
   let err;
   if(editCompId)({error:err}=await sb.from('completed_hikes').update(payload).eq('id',editCompId));
   else({error:err}=await sb.from('completed_hikes').insert(payload));
@@ -1312,8 +1330,23 @@ function filterComps(comps){
 function renderStats(){
   const filteredComp=filterComps(myComp);
   const uniqueDoneHikes=[...new Set(filteredComp.map(c=>c.hike_id))].map(id=>hikes.find(h=>h.id===id)).filter(Boolean);
-  const km=uniqueDoneHikes.reduce((s,h)=>s+(h.distance_km||0),0);
-  const el=uniqueDoneHikes.reduce((s,h)=>s+(h.elevation_gain_m||0),0);
+  // km: sum actual_distance_km per completion if set, else use hike default (once per unique hike)
+  const km=filteredComp.reduce((s,c)=>{
+    if(c.actual_distance_km!=null)return s+c.actual_distance_km;
+    // fallback: hike default, but avoid double-counting per unique hike for comps without actual value
+    return s;
+  },0)+uniqueDoneHikes.reduce((s,h)=>{
+    const hasActual=filteredComp.some(c=>c.hike_id===h.id&&c.actual_distance_km!=null);
+    return hasActual?s:s+(h.distance_km||0);
+  },0);
+  // el: sum actual_elevation_gain_m per completion if set, else use hike default (once per unique hike)
+  const el=filteredComp.reduce((s,c)=>{
+    if(c.actual_elevation_gain_m!=null)return s+c.actual_elevation_gain_m;
+    return s;
+  },0)+uniqueDoneHikes.reduce((s,h)=>{
+    const hasActual=filteredComp.some(c=>c.hike_id===h.id&&c.actual_elevation_gain_m!=null);
+    return hasActual?s:s+(h.elevation_gain_m||0);
+  },0);
   const time=filteredComp.reduce((s,c)=>s+(c.duration_minutes||0),0);
   const filterLabel={alltime:'Allzeit',year:'Dieses Jahr',together:'Gemeinsam',  'together-year':'Gemeinsam dieses Jahr'}[statFilter]||'';
   document.getElementById('shg').innerHTML=`
