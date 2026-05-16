@@ -567,12 +567,12 @@ body{font-weight:400}
 
 <div id="login">
   <div class="ll">
-    <div class="ll-bg">SWISS</br>ALPEN</div>
+    <div class="ll-bg">ALPEN</div>
     <div class="ll-c">
       <div class="ll-eye">Private Wanderliste</div>
       <div class="ll-h">Unsere<br><em>Berge</em>,<br>unsere Touren.</div>
       <div class="ll-hr"></div>
-      <div class="ll-s">Schweizer Wanderungen</div>
+      <div class="ll-s">Jede Wanderung, jeder Gipfel — für uns zwei.</div>
     </div>
   </div>
   <div class="lr">
@@ -789,6 +789,14 @@ body{font-weight:400}
           <input class="fi" id="m-h" type="number" min="0" max="99" placeholder="Stunden" style="margin-bottom:0">
           <input class="fi" id="m-m" type="number" min="0" max="59" placeholder="Minuten" style="margin-bottom:0">
         </div>
+      </div>
+      <div>
+        <label class="fl" style="margin-top:10px">Tatsächliche km</label>
+        <input class="fi" id="m-km" type="number" step="0.1" min="0" placeholder="z.B. 12.5" style="margin-bottom:0">
+      </div>
+      <div>
+        <label class="fl" style="margin-top:10px">Tatsächliche Höhenmeter</label>
+        <input class="fi" id="m-elev" type="number" min="0" placeholder="z.B. 1200" style="margin-bottom:0">
       </div>
       <div class="full">
         <label class="fl" style="margin-top:10px">Bewertung</label>
@@ -1218,7 +1226,6 @@ async function openHike(id){
     cur.external_url&&`<div class="ib full"><div class="ib-l"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Mehr Infos</div><a class="ext-link" href="${cur.external_url}" target="_blank">${cur.external_url.replace(/^https?:\/\//,'').split('/')[0]}</a></div>`,
   ].filter(Boolean).join('')||'<div class="ib full"><div class="ib-v" style="color:var(--ink3);font-style:italic">Keine Route-Info</div></div>';
 
-  setHeroImage(cur);  // show hero immediately, don't await
   await loadMedia(id);
   renderList();
   if(map)map.flyTo([cur.lat,cur.lng],12,{duration:1.2});
@@ -1238,6 +1245,8 @@ function renderDetailComps(){
       <div class="comp-entry-top">
         <span class="comp-date" style="color:${myColor}">${new Date(c.completed_at).toLocaleDateString('de-CH',{day:'2-digit',month:'long',year:'numeric'})}</span>
         ${hrs?`<span class="comp-time">${hrs}</span>`:''}
+        ${c.actual_km?`<span style="font-size:11px;color:var(--gl);font-weight:500">${c.actual_km}km</span>`:''}
+        ${c.actual_elevation_m?`<span style="font-size:11px;color:var(--gl);font-weight:500">${c.actual_elevation_m.toLocaleString()}m↑</span>`:''}
         ${rte?`<span class="comp-route-name">${rte.name}</span>`:''}
       </div>
       ${c.rating?`<div class="comp-stars">${'★'.repeat(c.rating)}${'☆'.repeat(5-c.rating)}</div>`:''}
@@ -1298,6 +1307,7 @@ function openComplModal(){
   document.getElementById('m-notes').value='';
   document.getElementById('m-diff').value='';
   document.getElementById('m-h').value='';document.getElementById('m-m').value='';
+  document.getElementById('m-km').value='';document.getElementById('m-elev').value='';
   document.getElementById('m-together').checked=false;
   setStar(0);selectedRouteId=null;
   renderRoutePicker();
@@ -1314,6 +1324,8 @@ function openEditComp(compId){
   document.getElementById('m-together').checked=c.together||false;
   if(c.duration_minutes){document.getElementById('m-h').value=Math.floor(c.duration_minutes/60);document.getElementById('m-m').value=c.duration_minutes%60}
   else{document.getElementById('m-h').value='';document.getElementById('m-m').value=''}
+  document.getElementById('m-km').value=c.actual_km||'';
+  document.getElementById('m-elev').value=c.actual_elevation_m||'';
   setStar(c.rating||0);
   selectedRouteId=c.route_id||null;
   renderRoutePicker(c.route_id);
@@ -1366,7 +1378,7 @@ function setStar(n){sRat=n;document.querySelectorAll('#stars .star').forEach((s,
 async function confirmComplete(){
   if(!cur)return;
   const h=parseInt(document.getElementById('m-h').value)||0,mn=parseInt(document.getElementById('m-m').value)||0;
-  const payload={hike_id:cur.id,completed_by:user.id,completed_at:document.getElementById('m-date').value,rating:sRat||null,notes:document.getElementById('m-notes').value||null,duration_minutes:h*60+mn||null,difficulty_actual:document.getElementById('m-diff').value||null,together:document.getElementById('m-together').checked,route_id:selectedRouteId||null};
+  const payload={hike_id:cur.id,completed_by:user.id,completed_at:document.getElementById('m-date').value,rating:sRat||null,notes:document.getElementById('m-notes').value||null,duration_minutes:h*60+mn||null,difficulty_actual:document.getElementById('m-diff').value||null,together:document.getElementById('m-together').checked,route_id:selectedRouteId||null,actual_km:parseFloat(document.getElementById('m-km').value)||null,actual_elevation_m:parseInt(document.getElementById('m-elev').value)||null};
   let err;
   if(editCompId)({error:err}=await sb.from('completed_hikes').update(payload).eq('id',editCompId));
   else({error:err}=await sb.from('completed_hikes').insert(payload));
@@ -1382,59 +1394,14 @@ async function deleteComp(compId){
 }
 
 /* ── MEDIA ── */
-// Fetches a Wikipedia thumbnail for a hike and saves it to the DB
-async function fetchWikiImage(hike){
-  // Try German Wikipedia first, then English
-  for(const lang of ['de','en']){
-    try{
-      const r=await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(hike.name)}`);
-      if(!r.ok)continue;
-      const d=await r.json();
-      const src=d?.thumbnail?.source;
-      if(!src)continue;
-      // Upscale thumbnail to 800px
-      const big=src.replace(/\/\d+px-/,'/800px-');
-      await sb.from('hikes').update({hero_image_url:big}).eq('id',hike.id);
-      hike.hero_image_url=big;
-      return big;
-    }catch(_){continue;}
-  }
-  return null;
-}
-
-// Sets the hero image in the detail header
-async function setHeroImage(hike){
-  const dh=document.getElementById('dh');
-  const ph=document.getElementById('dh-ph');
-  const oldImg=dh.querySelector('.dh-img');if(oldImg)oldImg.remove();
-  // Prefer stored URL, otherwise fetch from Wikipedia
-  const url=hike.hero_image_url||await fetchWikiImage(hike);
-  if(!url){ph.style.display='flex';return;}
-  const img=document.createElement('img');
-  img.className='dh-img';
-  img.alt=hike.name||'';
-  img.onerror=()=>{
-    img.remove();
-    ph.style.display='flex';
-    // Clear broken URL from DB so we retry next time
-    sb.from('hikes').update({hero_image_url:null}).eq('id',hike.id);
-    hike.hero_image_url=null;
-  };
-  img.src=url;
-  dh.insertBefore(img,dh.firstChild);
-  ph.style.display='none';
-}
-
 async function loadMedia(hikeId){
   const{data}=await sb.from('hike_media').select('*').eq('hike_id',hikeId).order('created_at',{ascending:true});
   const g=document.getElementById('d-mgrid'),hd=document.getElementById('d-mhead'),dh=document.getElementById('dh');
-  const ph=document.getElementById('dh-ph');
   const oldImg=dh.querySelector('.dh-img');if(oldImg)oldImg.remove();
   if(data?.length){
-    // Own uploaded photo takes priority as hero
     const img=document.createElement('img');img.className='dh-img';img.src=`${SU}/storage/v1/object/public/hike-media/${data[0].storage_path}`;img.alt='';
     dh.insertBefore(img,dh.firstChild);
-    ph.style.display='none';
+    document.getElementById('dh-ph').style.display='none';
     hd.style.display='flex';
     g.innerHTML=data.map(m=>{
       const url=`${SU}/storage/v1/object/public/hike-media/${m.storage_path}`;
@@ -1443,9 +1410,8 @@ async function loadMedia(hikeId){
         :`<div class="mth"><img src="${url}" loading="lazy" alt=""><button class="mth-del" onclick="delMedia('${m.id}','${m.storage_path}')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`;
     }).join('');
   }else{
-    // No own photos: use hero_image_url or fetch from Wikipedia
+    document.getElementById('dh-ph').style.display='flex';
     hd.style.display='none';g.innerHTML='';
-    await setHeroImage(cur);
   }
 }
 async function delMedia(id,path){
@@ -1559,8 +1525,9 @@ function filterComps(comps){
 function renderStats(){
   const filteredComp=filterComps(myComp);
   const uniqueDoneHikes=[...new Set(filteredComp.map(c=>c.hike_id))].map(id=>hikes.find(h=>h.id===id)).filter(Boolean);
-  const km=uniqueDoneHikes.reduce((s,h)=>s+(h.distance_km||0),0);
-  const el=uniqueDoneHikes.reduce((s,h)=>s+(h.elevation_gain_m||0),0);
+  // Use actual values from completion if available, otherwise fall back to hike defaults
+  const km=filteredComp.reduce((s,c)=>{const h=hikes.find(x=>x.id===c.hike_id);return s+(c.actual_km||h?.distance_km||0)},0);
+  const el=filteredComp.reduce((s,c)=>{const h=hikes.find(x=>x.id===c.hike_id);return s+(c.actual_elevation_m||h?.elevation_gain_m||0)},0);
   const time=filteredComp.reduce((s,c)=>s+(c.duration_minutes||0),0);
   const filterLabel={alltime:'Allzeit',year:'Dieses Jahr',together:'Gemeinsam',  'together-year':'Gemeinsam dieses Jahr'}[statFilter]||'';
   document.getElementById('shg').innerHTML=`
