@@ -1320,6 +1320,7 @@ function renderStats(){
     <div class="sh-s"><div class="sh-v">${filteredComp.length}</div><div class="sh-l">Begehungen</div></div>
     <div class="sh-s"><div class="sh-v">${uniqueDoneHikes.length}</div><div class="sh-l">Berge</div></div>
     <div class="sh-s"><div class="sh-v">${Math.round(km)}</div><div class="sh-l">km</div></div>
+    <div class="sh-s"><div class="sh-v">${Math.round(el).toLocaleString('de-CH')}</div><div class="sh-l">Hm ↑</div></div>
     <div class="sh-s"><div class="sh-v">${Math.floor(time/60)}</div><div class="sh-l">Stunden</div></div>`;
   const dc={easy:0,medium:0,hard:0,expert:0};
   filteredComp.forEach(c=>{const h=hikes.find(x=>x.id===c.hike_id);const d=c.difficulty_actual||(h?.difficulty)||'medium';if(dc[d]!==undefined)dc[d]++});
