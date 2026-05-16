@@ -606,7 +606,7 @@ body{font-weight:400}
     </nav>
     <div class="hright">
       <button class="hbtn" id="sat-btn" title="Satellit" onclick="toggleSat()"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M8 8h8v8H8z" opacity=".4"/><circle cx="12" cy="12" r="2"/></svg></button>
-      <button class="hbtn" id="routes-btn" title="Routen" onclick="toggleRoutes()"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></button>
+      <button class="hbtn on" id="routes-btn" title="Routen" onclick="toggleRoutes()"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></button>
       <button class="hbtn on" id="pins-btn" title="Pins anzeigen" onclick="togglePins()"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></button>
       <button class="hbtn" id="loc-btn" title="Mein Standort" onclick="locUser()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7"/></svg></button>
       <button class="hbtn" id="leg-btn" title="Legende" onclick="toggleLegend()"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg></button>
@@ -981,14 +981,8 @@ function initMap(){
     }
   });
   placeMarkers();renderRoutes();locUser();
-  // Fix: force marker redraw on zoom/pan to prevent disappearing
-  map.on('zoomend moveend', function(){
-    requestAnimationFrame(function(){
-      map.eachLayer(function(layer){
-        if(layer._icon){try{layer.update();}catch(e){}}
-      });
-    });
-  });
+  requestAnimationFrame(()=>{map.invalidateSize();placeMarkers();renderRoutes()});
+  window.addEventListener('resize',()=>{if(map)map.invalidateSize()});
 }
 
 function toggleSat(){satMode=!satMode;if(satMode){map.removeLayer(baseTopo);baseSat.addTo(map)}else{map.removeLayer(baseSat);baseTopo.addTo(map)};document.getElementById('sat-btn').classList.toggle('on',satMode)}
@@ -1514,6 +1508,7 @@ function sw(v){
   document.getElementById(v+'-view').classList.add('on');
   const n=document.getElementById('nav-'+v);if(n)n.classList.add('on');
   if(v==='stats')renderStats();if(v==='settings')initSettings();
+  if(v==='map'&&map)requestAnimationFrame(()=>{map.invalidateSize();placeMarkers();renderRoutes()});
 }
 
 /* ── STATS ── */
