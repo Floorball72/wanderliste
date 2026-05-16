@@ -889,7 +889,8 @@ function renderRoutes(){
     if(done){
       const uids=[...new Set(compsWithRoute.map(c=>c.completed_by))];
       const myUid=user?.id;
-      const together=uids.length>1&&uids.some(u=>u!==myUid)&&uids.some(u=>u===myUid);
+      const togetherFlag=compsWithRoute.some(c=>c.together===true);
+      const together=togetherFlag||(uids.length>1&&uids.some(u=>u!==myUid)&&uids.some(u=>u===myUid));
       const myC=compsWithRoute.find(c=>c.completed_by===myUid);
       if(together)color=TOGETHER_COLOR;
       else if(myC)color=ACCENT;
