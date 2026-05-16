@@ -367,6 +367,19 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
 .stat-fc:hover{border-color:var(--ink3);color:var(--ink)}
 .stat-fc.on{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:600}
 
+/* ── LIKE BUTTON ── */
+.like-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--r-md);border:1.5px solid var(--line);background:#fff;color:var(--ink3);font-size:12px;font-weight:600;font-family:'Montserrat',sans-serif;cursor:pointer;transition:border-color .18s var(--ease),color .18s var(--ease),background .18s var(--ease),transform .15s var(--ease);letter-spacing:.005em;white-space:nowrap}
+.like-btn:hover{border-color:var(--ink3);color:var(--ink);background:var(--paper2)}
+.like-btn.liked{border-color:#c0415a;background:#fdf0f3;color:#c0415a}
+.like-btn:active{transform:scale(.96)}
+.like-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:fill .18s var(--ease),stroke .18s var(--ease)}
+.like-btn.liked svg{fill:#c0415a;stroke:#c0415a}
+.like-count{font-size:10px;color:var(--ink3);font-weight:500;font-variant-numeric:tabular-nums}
+/* Like badge in hike list */
+.hi-like{width:16px;height:16px;flex-shrink:0;stroke:var(--ink4);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;cursor:pointer;transition:stroke .15s var(--ease),fill .15s var(--ease),transform .15s var(--ease)}
+.hi-like:hover{stroke:#c0415a;transform:scale(1.2)}
+.hi-like.liked{stroke:#c0415a;fill:#c0415a}
+
 /* Leaflet popup polish */
 .leaflet-popup-content-wrapper{border-radius:var(--r-md)!important;box-shadow:var(--shadow-lg)!important;padding:0!important;overflow:hidden}
 .leaflet-popup-content{margin:0!important;font-family:'Montserrat',sans-serif!important}
@@ -464,6 +477,9 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
         <!-- Actions -->
         <div class="dact" id="dact"></div>
 
+        <!-- Like -->
+        <div id="d-like-section" style="margin-bottom:14px"></div>
+
         <!-- Completions history -->
         <div id="d-comps-section"></div>
 
@@ -510,6 +526,7 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
           <div class="fc" data-d="done" onclick="sDF(this)">Gemacht</div>
           <div class="fc" data-d="unvisited" onclick="sDF(this)">Offen</div>
           <div class="fc" data-d="custom" onclick="sDF(this)">Eigene</div>
+          <div class="fc" data-d="liked" onclick="sDF(this)">Geliked</div>
         </div>
       </div>
       <div class="hlist" id="hlist"></div>
@@ -698,7 +715,7 @@ const ROUTE_COLORS=['#65c0bc','#1a4d6e','#c87941','#8a3a9a','#3a7a7a','#9a3a3a']
 const DL={easy:'Leicht (T1–T2)',medium:'Mittel (T3)',hard:'Schwer (T4)',expert:'Experte (T5+)'};
 const DS={easy:'Leicht',medium:'Mittel',hard:'Schwer',expert:'Experte'};
 
-let user=null,profile=null,hikes=[],routes=[],myComp=[],allComp=[],allProfiles=[];
+let user=null,profile=null,hikes=[],routes=[],myComp=[],allComp=[],allProfiles=[],hikeLikes=[];
 let markers={},routeLayers=[],locMarker=null;
 let drawMode=false,drawPts=[],drawPolyline=null,drawDots=[],drawingRouteId=null;
 let map=null,baseTopo=null,baseSat=null,satMode=false;
@@ -751,14 +768,15 @@ function applyProfileUI(){
 
 /* ── DATA ── */
 async function loadData(){
-  const[h,r,c,ca,cp]=await Promise.all([
+  const[h,r,c,ca,cp,lk]=await Promise.all([
     sb.from('hikes').select('*').order('name'),
     sb.from('hike_routes').select('*').order('created_at'),
     sb.from('completed_hikes').select('*').eq('completed_by',user.id).order('completed_at',{ascending:false}),
     sb.from('completed_hikes').select('*').order('completed_at',{ascending:false}),
-    sb.from('profiles').select('id,display_name,username,route_color,avatar_url')
+    sb.from('profiles').select('id,display_name,username,route_color,avatar_url'),
+    sb.from('hike_likes').select('*')
   ]);
-  hikes=h.data||[];routes=r.data||[];myComp=c.data||[];allComp=ca.data||[];allProfiles=cp.data||[];
+  hikes=h.data||[];routes=r.data||[];myComp=c.data||[];allComp=ca.data||[];allProfiles=cp.data||[];hikeLikes=lk.data||[];
   renderList();
   // Count unique completed hikes (not total completions)
   const uniqueDone=new Set(myComp.map(c=>c.hike_id)).size;
@@ -771,6 +789,44 @@ const getAllCompsForHike=id=>allComp.filter(c=>c.hike_id===id);
 const isEverDone=id=>myComp.some(c=>c.hike_id===id);
 const getPro=uid=>allProfiles.find(p=>p.id===uid)||null;
 function uColor(uid){if(uid===user?.id)return ACCENT;return getPro(uid)?.route_color||ROUTE_COLORS[1]}
+
+/* ── LIKES ── */
+const getLikesForHike=id=>hikeLikes.filter(l=>l.hike_id===id);
+const iLikedHike=id=>hikeLikes.some(l=>l.hike_id===id&&l.user_id===user?.id);
+const isLikedByAnyone=id=>hikeLikes.some(l=>l.hike_id===id);
+
+async function toggleLike(hikeId,event){
+  if(event){event.stopPropagation()}
+  const already=iLikedHike(hikeId);
+  if(already){
+    const{error}=await sb.from('hike_likes').delete().eq('hike_id',hikeId).eq('user_id',user.id);
+    if(error){toast('Fehler: '+error.message);return}
+    hikeLikes=hikeLikes.filter(l=>!(l.hike_id===hikeId&&l.user_id===user.id));
+  }else{
+    const{data,error}=await sb.from('hike_likes').insert({hike_id:hikeId,user_id:user.id}).select().single();
+    if(error){toast('Fehler: '+error.message);return}
+    if(data)hikeLikes.push(data);
+  }
+  renderList();
+  if(cur?.id===hikeId)renderDetailLike();
+}
+
+function renderDetailLike(){
+  if(!cur)return;
+  const el=document.getElementById('d-like-section');
+  if(!el)return;
+  const liked=iLikedHike(cur.id);
+  const allLikes=getLikesForHike(cur.id);
+  const otherLikers=allLikes.filter(l=>l.user_id!==user?.id);
+  const likerNames=otherLikers.map(l=>{const p=getPro(l.user_id);return p?.display_name||p?.username||'Jemand'}).join(', ');
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <button class="like-btn${liked?' liked':''}" onclick="toggleLike('${cur.id}')">
+      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      ${liked?'Geliked':'Liken'}
+    </button>
+    ${allLikes.length>0?`<span class="like-count">${allLikes.length} ${allLikes.length===1?'Person mag diese Wanderung':'Personen mögen diese Wanderung'}${likerNames?` · ${likerNames}`:''}</span>`:''}
+  </div>`;
+}
 
 /* ── MAP ── */
 function initMap(){
@@ -966,14 +1022,18 @@ function renderList(){
     const done=isEverDone(h.id);
     if(dF==='all')return mq;if(dF==='done')return mq&&done;
     if(dF==='unvisited')return mq&&!done;if(dF==='custom')return mq&&h.is_custom;
+    if(dF==='liked')return mq&&iLikedHike(h.id);
     return mq&&h.difficulty===dF;
   });
   document.getElementById('hlist').innerHTML=f.map(h=>{
     const done=isEverDone(h.id);const isActive=cur?.id===h.id;
     const comps=getMyCompsForHike(h.id);
+    const liked=iLikedHike(h.id);
+    const totalLikes=getLikesForHike(h.id).length;
     return`<div class="hi${done?' done':''}${isActive?' active-item':''}" onclick="openHike('${h.id}');if(window.innerWidth<900){toggleMobList()}">
       <div class="hi-r1">
         <div class="hi-nm">${h.name}</div>
+        <svg class="hi-like${liked?' liked':''}" viewBox="0 0 24 24" onclick="toggleLike('${h.id}',event)" title="${liked?'Like entfernen':'Liken'}"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         <div class="hi-tick"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       </div>
       <div class="hi-meta">
@@ -982,6 +1042,7 @@ function renderList(){
         <span class="db db-${h.difficulty}">${DS[h.difficulty]}</span>
         ${comps.length>1?`<span class="hi-cnt">${comps.length}×</span>`:''}
         ${h.is_custom?'<span style="font-size:9px;color:var(--gd);font-weight:700;letter-spacing:.08em;text-transform:uppercase">Eigen</span>':''}
+        ${totalLikes>0?`<span style="font-size:10px;color:#c0415a;font-weight:600">${totalLikes} Gefällt</span>`:''}
       </div>
     </div>`;
   }).join('')||'<div style="padding:24px;text-align:center;font-size:12px;color:var(--ink3)">Keine Wanderungen gefunden</div>';
@@ -1019,6 +1080,7 @@ async function openHike(id){
 
   renderDetailComps();
   renderDetailRoutes();
+  renderDetailLike();
 
   document.getElementById('d-start').innerHTML=[
     cur.description&&`<div class="ib full"><div class="ib-l"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Beschreibung</div><div class="ib-v">${cur.description}</div></div>`,
