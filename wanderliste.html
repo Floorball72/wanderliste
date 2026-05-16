@@ -1023,18 +1023,20 @@ function renderList(){
     const done=isEverDone(h.id);
     if(dF==='all')return mq;if(dF==='done')return mq&&done;
     if(dF==='unvisited')return mq&&!done;if(dF==='custom')return mq&&h.is_custom;
-    if(dF==='liked')return mq&&iLikedHike(h.id);
+    if(dF==='liked')return mq&&isLikedByAnyone(h.id);
     return mq&&h.difficulty===dF;
   });
   document.getElementById('hlist').innerHTML=f.map(h=>{
     const done=isEverDone(h.id);const isActive=cur?.id===h.id;
     const comps=getMyCompsForHike(h.id);
-    const liked=iLikedHike(h.id);
-    const totalLikes=getLikesForHike(h.id).length;
+    const iLiked=iLikedHike(h.id);
+    const allLikes=getLikesForHike(h.id);
+    const anyLiked=allLikes.length>0;
+    const likerNames=allLikes.map(l=>{if(l.user_id===user?.id)return profile?.display_name||'Ich';const p=getPro(l.user_id);return p?.display_name||p?.username||'Partner';}).join(' & ');
     return`<div class="hi${done?' done':''}${isActive?' active-item':''}" onclick="openHike('${h.id}');if(window.innerWidth<900){toggleMobList()}">
       <div class="hi-r1">
         <div class="hi-nm">${h.name}</div>
-        <svg class="hi-like${liked?' liked':''}" viewBox="0 0 24 24" onclick="toggleLike('${h.id}',event)" title="${liked?'Like entfernen':'Liken'}"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <svg class="hi-like${anyLiked?' liked':''}" style="${anyLiked&&!iLiked?'stroke:#c0415a;fill:rgba(192,65,90,0.3)':''}" viewBox="0 0 24 24" onclick="toggleLike('${h.id}',event)" title="${iLiked?'Like entfernen':(anyLiked?'Geliked von '+likerNames:'Liken')}"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         <div class="hi-tick"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       </div>
       <div class="hi-meta">
@@ -1043,7 +1045,7 @@ function renderList(){
         <span class="db db-${h.difficulty}">${DS[h.difficulty]}</span>
         ${comps.length>1?`<span class="hi-cnt">${comps.length}×</span>`:''}
         ${h.is_custom?'<span style="font-size:9px;color:var(--gd);font-weight:700;letter-spacing:.08em;text-transform:uppercase">Eigen</span>':''}
-        ${totalLikes>0?`<span style="font-size:10px;color:#c0415a;font-weight:600">${totalLikes} Gefällt</span>`:''}
+        ${anyLiked?`<span style="font-size:10px;color:#c0415a;font-weight:600" title="${likerNames}">♥ ${likerNames}</span>`:''}
       </div>
     </div>`;
   }).join('')||'<div style="padding:24px;text-align:center;font-size:12px;color:var(--ink3)">Keine Wanderungen gefunden</div>';
@@ -1246,11 +1248,26 @@ async function confirmComplete(){
   const h=parseInt(document.getElementById('m-h').value)||0,mn=parseInt(document.getElementById('m-m').value)||0;
   const actualKm=parseFloat(document.getElementById('m-km').value)||null;
   const actualGain=parseInt(document.getElementById('m-gain').value)||null;
-  const payload={hike_id:cur.id,completed_by:user.id,completed_at:document.getElementById('m-date').value,rating:sRat||null,notes:document.getElementById('m-notes').value||null,duration_minutes:h*60+mn||null,difficulty_actual:document.getElementById('m-diff').value||null,together:document.getElementById('m-together').checked,route_id:selectedRouteId||null,actual_distance_km:actualKm,actual_elevation_gain_m:actualGain};
+  const together=document.getElementById('m-together').checked;
+  const payload={hike_id:cur.id,completed_by:user.id,completed_at:document.getElementById('m-date').value,rating:sRat||null,notes:document.getElementById('m-notes').value||null,duration_minutes:h*60+mn||null,difficulty_actual:document.getElementById('m-diff').value||null,together,route_id:selectedRouteId||null,actual_distance_km:actualKm,actual_elevation_gain_m:actualGain};
   let err;
   if(editCompId)({error:err}=await sb.from('completed_hikes').update(payload).eq('id',editCompId));
   else({error:err}=await sb.from('completed_hikes').insert(payload));
   if(err){toast('Fehler: '+err.message);return}
+
+  // Bug-Fix: Wenn "gemeinsam" gesetzt, auch für Partner einen Eintrag erstellen (via RPC mit SECURITY DEFINER)
+  if(together&&!editCompId){
+    await sb.rpc("insert_together_for_partners",{
+      p_hike_id:cur.id,
+      p_completed_at:payload.completed_at,
+      p_route_id:selectedRouteId||null,
+      p_duration_minutes:payload.duration_minutes||null,
+      p_difficulty_actual:payload.difficulty_actual||null,
+      p_actual_distance_km:actualKm,
+      p_actual_elevation_gain_m:actualGain
+    });
+  }
+
   closeModals();await loadData();renderRoutes();placeMarkers();openHike(cur.id);
   toast(editCompId?'Begehung aktualisiert':'Begehung eingetragen');
 }
