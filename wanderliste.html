@@ -761,11 +761,6 @@ body{font-weight:400}
       <label class="fl">Bestätigen</label><input class="fi" id="s-pw2" type="password">
       <button class="ssave" onclick="changePw()">Passwort ändern</button>
     </div>
-    <div class="setc">
-      <div class="set-t">Routenfarbe</div>
-      <div class="set-s">Farbe deiner Routen auf der Karte</div>
-      <div class="color-row" id="color-row"></div>
-    </div>
     <div class="setc" style="border-color:rgba(122,45,45,.22)">
       <div class="set-t">Konto</div>
       <div class="set-s">Abmelden von diesem Gerät</div>
@@ -809,6 +804,14 @@ body{font-weight:400}
         <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;color:var(--ink2)">
           <input type="checkbox" id="m-together" style="accent-color:var(--g)">Zusammen gemacht
         </label>
+      </div>
+      <div style="margin-top:10px">
+        <label class="fl">Tatsächliche Distanz (km)</label>
+        <input class="fi" id="m-actual-dist" type="number" min="0" step="0.1" placeholder="z.B. 12.5" style="margin-bottom:0">
+      </div>
+      <div style="margin-top:10px">
+        <label class="fl">Tatsächliche Höhenmeter (hm)</label>
+        <input class="fi" id="m-actual-elev" type="number" min="0" step="10" placeholder="z.B. 850" style="margin-bottom:0">
       </div>
     </div>
     <div class="mfoot">
@@ -993,12 +996,14 @@ function placeMarkers(){
   if(!showPins)return;
   hikes.forEach(h=>{
     const done=isEverDone(h.id);
+    const myCompsForHike=getMyCompsForHike(h.id);
+    const isTogether=myCompsForHike.some(c=>c.together);
     const hikeRoutes=getRoutesForHike(h.id);
     const hasDrawnRoutes=hikeRoutes.some(r=>r.route_geometry&&r.route_geometry.length>1);
     const allCompsHaveRoutes=getAllCompsForHike(h.id).every(c=>c.route_id);
     // Hide pin only if done AND all completions have drawn routes showing
     if(done&&hasDrawnRoutes&&allCompsHaveRoutes&&showRoutes)return;
-    const bg=done?'var(--g)':'var(--ink)';
+    const bg=done?(isTogether?TOGETHER_COLOR:'var(--g)'):'var(--ink)';
     const sz=h.elevation_m>=3000?20:16;
     const ringStyle=h.is_custom?'border-style:dashed;border-width:1.5px':'border-width:2px';
     const innerDot=done?`<div style="position:absolute;inset:4px;border-radius:50%;background:var(--paper);opacity:.95"></div>`:'';
@@ -1024,11 +1029,10 @@ function renderRoutes(){
     const done=compsWithRoute.length>0;
     let color,weight,opacity,dash;
     if(done){
-      const uids=[...new Set(compsWithRoute.map(c=>c.completed_by))];
       const myUid=user?.id;
-      const together=uids.length>1&&uids.some(u=>u!==myUid)&&uids.some(u=>u===myUid);
       const myC=compsWithRoute.find(c=>c.completed_by===myUid);
-      if(together)color=TOGETHER_COLOR;
+      const together=compsWithRoute.some(c=>c.together);
+      if(together&&myC)color=TOGETHER_COLOR;
       else if(myC)color=profile?.route_color||'#65c0bc';
       else{const p=getPro(uids[0]);color=p?.route_color||'#1a4d6e';}
       weight=4;opacity=.9;dash=null;
@@ -1248,6 +1252,7 @@ function renderDetailComps(){
       </div>
       ${c.rating?`<div class="comp-stars">${'★'.repeat(c.rating)}${'☆'.repeat(5-c.rating)}</div>`:''}
       ${c.together?`<div style="font-family:var(--f-mono);font-size:10px;color:var(--amber);font-weight:500;margin-top:6px;letter-spacing:.14em;text-transform:uppercase">— gemeinsam unterwegs</div>`:''}
+      ${(c.actual_distance_km||c.actual_elevation_gain_m)?`<div style="font-size:11px;color:var(--ink3);margin-top:4px">${c.actual_distance_km?c.actual_distance_km+'\u202fkm':''}${c.actual_distance_km&&c.actual_elevation_gain_m?' · ':''}${c.actual_elevation_gain_m?c.actual_elevation_gain_m+'\u202fhm':''}</div>`:''}
       ${c.notes?`<div class="comp-notes">${c.notes}</div>`:''}
       <div class="comp-actions">
         <button class="comp-edit-btn" onclick="openEditComp('${c.id}')">Bearbeiten</button>
@@ -1269,8 +1274,8 @@ function renderDetailRoutes(){
     const myCompsOnRoute=myComp.filter(c=>c.route_id===r.id);
     const isRunByMe=myCompsOnRoute.length>0;
     // Determine line color: together=orange, myrun=mycolor, other=their color, planned=grey
-    const otherRan=compsOnRoute.some(c=>c.completed_by!==user?.id);
-    const lineColor=isRunByMe&&otherRan?TOGETHER_COLOR:isRunByMe?color:compsOnRoute.length>0?(getPro(compsOnRoute[0].completed_by)?.route_color||ROUTE_COLORS[1]):'#999';
+    const isTogether=compsOnRoute.some(c=>c.together);
+    const lineColor=isRunByMe&&isTogether?TOGETHER_COLOR:isRunByMe?color:compsOnRoute.length>0?(getPro(compsOnRoute[0].completed_by)?.route_color||ROUTE_COLORS[1]):'#999';
     return`<div class="route-card${isRunByMe?' active-route':''}">
       <div class="route-card-top">
         ${hasGeo?`<div style="width:20px;height:3px;border-radius:2px;background:${lineColor};flex-shrink:0;${!isRunByMe?'border:1px dashed #ccc;height:0':''}"></div>`:'<div style="width:20px;height:0;border-top:2px dashed #ccc;flex-shrink:0"></div>'}
@@ -1305,6 +1310,8 @@ function openComplModal(){
   document.getElementById('m-diff').value='';
   document.getElementById('m-h').value='';document.getElementById('m-m').value='';
   document.getElementById('m-together').checked=false;
+  document.getElementById('m-actual-dist').value='';
+  document.getElementById('m-actual-elev').value='';
   setStar(0);selectedRouteId=null;
   renderRoutePicker();
   document.getElementById('modal-c').classList.add('on');
@@ -1320,6 +1327,8 @@ function openEditComp(compId){
   document.getElementById('m-together').checked=c.together||false;
   if(c.duration_minutes){document.getElementById('m-h').value=Math.floor(c.duration_minutes/60);document.getElementById('m-m').value=c.duration_minutes%60}
   else{document.getElementById('m-h').value='';document.getElementById('m-m').value=''}
+  document.getElementById('m-actual-dist').value=c.actual_distance_km||'';
+  document.getElementById('m-actual-elev').value=c.actual_elevation_gain_m||'';
   setStar(c.rating||0);
   selectedRouteId=c.route_id||null;
   renderRoutePicker(c.route_id);
@@ -1372,7 +1381,7 @@ function setStar(n){sRat=n;document.querySelectorAll('#stars .star').forEach((s,
 async function confirmComplete(){
   if(!cur)return;
   const h=parseInt(document.getElementById('m-h').value)||0,mn=parseInt(document.getElementById('m-m').value)||0;
-  const payload={hike_id:cur.id,completed_by:user.id,completed_at:document.getElementById('m-date').value,rating:sRat||null,notes:document.getElementById('m-notes').value||null,duration_minutes:h*60+mn||null,difficulty_actual:document.getElementById('m-diff').value||null,together:document.getElementById('m-together').checked,route_id:selectedRouteId||null};
+  const payload={hike_id:cur.id,completed_by:user.id,completed_at:document.getElementById('m-date').value,rating:sRat||null,notes:document.getElementById('m-notes').value||null,duration_minutes:h*60+mn||null,difficulty_actual:document.getElementById('m-diff').value||null,together:document.getElementById('m-together').checked,route_id:selectedRouteId||null,actual_distance_km:parseFloat(document.getElementById('m-actual-dist').value)||null,actual_elevation_gain_m:parseInt(document.getElementById('m-actual-elev').value)||null};
   let err;
   if(editCompId)({error:err}=await sb.from('completed_hikes').update(payload).eq('id',editCompId));
   else({error:err}=await sb.from('completed_hikes').insert(payload));
