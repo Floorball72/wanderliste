@@ -811,21 +811,30 @@ function placeMarkers(){
 function renderRoutes(){
   routeLayers.forEach(l=>{try{l.remove()}catch(_){}});routeLayers=[];
   if(!showRoutes)return;
+  // Build completion map
   const byHike={};
   allComp.forEach(c=>{if(!byHike[c.hike_id])byHike[c.hike_id]=[];byHike[c.hike_id].push(c)});
   hikes.forEach(h=>{
     if(!h.route_geometry||h.route_geometry.length<2)return;
-    const comps=byHike[h.id];if(!comps||comps.length===0)return;
     const latlngs=h.route_geometry.map(p=>[p[1],p[0]]);
-    const uids=[...new Set(comps.map(c=>c.completed_by))];
-    const together=uids.length>1;
-    const myC=comps.find(c=>c.completed_by===user?.id);
-    let color;
-    if(together)color=TOGETHER_COLOR;
-    else if(myC)color=profile?.route_color||ROUTE_COLORS[0];
-    else{color=getPro(uids[0])?.route_color||ROUTE_COLORS[1]}
-    const pl=L.polyline(latlngs,{color,weight:4,opacity:.9,lineJoin:'round',lineCap:'round'}).addTo(map);
-    pl.bindPopup(`<div class="pop" style="padding:12px 14px;cursor:pointer;background:#fff" onclick="openHike('${h.id}')"><div style="font-family:'Playfair Display',serif;font-size:14px;color:#0f0e0b">${h.name}</div><div style="margin-top:4px;font-size:10px;background:#eef4f0;color:#2d5a3d;padding:2px 7px;border-radius:9px;font-weight:600;display:inline-block">✓ ${together?'Gemeinsam':'Gemacht'}</div></div>`,{closeButton:false});
+    const comps=byHike[h.id]||[];
+    const done=comps.length>0;
+    let color,weight,opacity,dash;
+    if(done){
+      const uids=[...new Set(comps.map(c=>c.completed_by))];
+      const together=uids.length>1;
+      const myC=comps.find(c=>c.completed_by===user?.id);
+      if(together)color=TOGETHER_COLOR;
+      else if(myC)color=profile?.route_color||ROUTE_COLORS[0];
+      else color=getPro(uids[0])?.route_color||ROUTE_COLORS[1];
+      weight=4;opacity=.9;dash=null;
+    }else{
+      // Not completed yet — show as dashed grey
+      color='#888';weight=3;opacity=.55;dash='8,5';
+    }
+    const pl=L.polyline(latlngs,{color,weight,opacity,dashArray:dash,lineJoin:'round',lineCap:'round'}).addTo(map);
+    const badge=done?`<div style="margin-top:4px;font-size:10px;background:#eef4f0;color:#2d5a3d;padding:2px 7px;border-radius:9px;font-weight:600;display:inline-block">✓ Gemacht</div>`:`<div style="margin-top:4px;font-size:10px;background:#f5f5f5;color:#888;padding:2px 7px;border-radius:9px;font-weight:600;display:inline-block">Route eingezeichnet</div>`;
+    pl.bindPopup(`<div style="padding:12px 14px;cursor:pointer;background:#fff;min-width:140px" onclick="openHike('${h.id}')"><div style="font-family:'Playfair Display',serif;font-size:14px;color:#0f0e0b">${h.name}</div>${badge}</div>`,{closeButton:false});
     pl.on('click',()=>openHike(h.id));
     routeLayers.push(pl);
   });
@@ -893,15 +902,27 @@ function cancelDraw(){
 }
 async function saveDraw(){
   if(!cur||drawPts.length<2){toast('Mindestens 2 Punkte erforderlich');return}
-  const{error}=await sb.from('hikes').update({route_geometry:drawPts}).eq('id',cur.id);
+  toast('Wird gespeichert…');
+  const savedPts=[...drawPts];
+  const{error}=await sb.from('hikes').update({route_geometry:savedPts}).eq('id',cur.id);
   if(error){toast('Fehler: '+error.message);return}
+  // Update local state BEFORE render
   const idx=hikes.findIndex(h=>h.id===cur.id);
-  if(idx>=0)hikes[idx].route_geometry=drawPts;
-  cur.route_geometry=drawPts;
-  cancelDraw();
-  renderRoutes();placeMarkers();
+  if(idx>=0)hikes[idx].route_geometry=savedPts;
+  cur.route_geometry=savedPts;
+  // Clear draw UI without touching previewLayer
+  drawMode=false;
+  document.getElementById('draw-toolbar').classList.remove('on');
+  map.getContainer().style.cursor='';
+  if(drawPolyline){drawPolyline.remove();drawPolyline=null}
+  drawDots.forEach(d=>d.remove());drawDots=[];
+  drawPts=[];
+  // Remove old preview, render fresh
+  if(previewLayer){previewLayer.remove();previewLayer=null}
+  renderRoutes();
+  placeMarkers();
   renderDrawSection();
-  toast('Route gespeichert ✓');
+  toast('Route gespeichert ✓ ('+savedPts.length+' Punkte)');
 }
 async function clearRoute(){
   if(!cur||!confirm('Route löschen?'))return;
@@ -913,11 +934,13 @@ async function clearRoute(){
   renderRoutes();placeMarkers();renderDrawSection();toast('Route gelöscht');
 }
 function showRoutePreview(){
+  // previewLayer only needed when global routes are hidden
+  // When routes visible, renderRoutes() already shows it
   if(previewLayer){previewLayer.remove();previewLayer=null}
-  if(!cur?.route_geometry||cur.route_geometry.length<2)return;
-  if(isDone(cur.id)&&showRoutes)return;
-  const latlngs=cur.route_geometry.map(p=>[p[1],p[0]]);
-  previewLayer=L.polyline(latlngs,{color:'#888',weight:3,dashArray:'6,4',opacity:.65}).addTo(map);
+  if(!showRoutes&&cur?.route_geometry&&cur.route_geometry.length>1){
+    const latlngs=cur.route_geometry.map(p=>[p[1],p[0]]);
+    previewLayer=L.polyline(latlngs,{color:'#888',weight:3,dashArray:'6,4',opacity:.65}).addTo(map);
+  }
 }
 function renderDrawSection(){
   const el=document.getElementById('d-draw');if(!cur){el.innerHTML='';return}
