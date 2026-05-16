@@ -1381,11 +1381,13 @@ async function deleteComp(compId){
 async function loadMedia(hikeId){
   const{data}=await sb.from('hike_media').select('*').eq('hike_id',hikeId).order('created_at',{ascending:true});
   const g=document.getElementById('d-mgrid'),hd=document.getElementById('d-mhead'),dh=document.getElementById('dh');
+  const ph=document.getElementById('dh-ph');
   const oldImg=dh.querySelector('.dh-img');if(oldImg)oldImg.remove();
   if(data?.length){
+    // Eigenes hochgeladenes Foto → als Titelbild
     const img=document.createElement('img');img.className='dh-img';img.src=`${SU}/storage/v1/object/public/hike-media/${data[0].storage_path}`;img.alt='';
     dh.insertBefore(img,dh.firstChild);
-    document.getElementById('dh-ph').style.display='none';
+    ph.style.display='none';
     hd.style.display='flex';
     g.innerHTML=data.map(m=>{
       const url=`${SU}/storage/v1/object/public/hike-media/${m.storage_path}`;
@@ -1394,8 +1396,19 @@ async function loadMedia(hikeId){
         :`<div class="mth"><img src="${url}" loading="lazy" alt=""><button class="mth-del" onclick="delMedia('${m.id}','${m.storage_path}')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`;
     }).join('');
   }else{
-    document.getElementById('dh-ph').style.display='flex';
+    // Keine eigenen Fotos → hero_image_url aus DB als Fallback
     hd.style.display='none';g.innerHTML='';
+    if(cur?.hero_image_url){
+      const img=document.createElement('img');
+      img.className='dh-img';
+      img.src=cur.hero_image_url;
+      img.alt=cur.name||'';
+      img.onerror=()=>{img.remove();ph.style.display='flex'};
+      dh.insertBefore(img,dh.firstChild);
+      ph.style.display='none';
+    }else{
+      ph.style.display='flex';
+    }
   }
 }
 async function delMedia(id,path){
