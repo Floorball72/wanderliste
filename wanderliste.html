@@ -50,9 +50,9 @@
   --t-micro:9.5px;
 
   /* Fonts */
-  --f-serif:'Playfair Display',Georgia,serif;
+  --f-serif:'Montserrat',system-ui,-apple-system,sans-serif;
   --f-sans:'Montserrat',system-ui,-apple-system,sans-serif;
-  --f-mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --f-mono:'Montserrat',system-ui,-apple-system,sans-serif;
 
   /* Spacing (4px base) */
   --s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:20px;--s-6:24px;--s-7:32px;--s-8:48px;--s-9:64px;
@@ -467,6 +467,98 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
 }
+
+/* ── MONOTYPE WEIGHT SYSTEM (Montserrat only) ── */
+/* All hierarchy via weight + letter-spacing + size — no more font-family contrast */
+body{font-weight:400}
+
+/* Tabular numerals on numeric/eyebrow tokens */
+.num,.sp-cnt,.hi-sub,.hi-cnt,.le-n,.le-el,.le-dt,.dsb-v,.dsb-l,.sh-v,.sh-l,.sh-eye,.sp-eye,.ll-eye,.lbl,.fl,.ib-l,.lg-t,.upz-t,.eyebrow,.rca-btn,.rca-add,.comp-edit-btn,.comp-del-btn,.comp-route-name,.dh-edit-btn,.popup-meta,.popup-route,.popup-done,.popup-pending,.bn,.blbl,.db,.vis-toggle,.coord-hint,.route-card-meta,.rp-meta,.comp-time,.log-card-cnt,.lnote{font-feature-settings:"tnum","ss01";font-variant-numeric:tabular-nums}
+
+/* Display / hero — tight tracking, heavy weight */
+.splash-logo{font-weight:600;letter-spacing:-.03em}
+.splash-logo em{font-weight:300;font-style:normal}
+.ll-h{font-weight:700;letter-spacing:-.045em}
+.ll-h em{font-weight:300;font-style:normal;color:oklch(82% 0.06 152 / .85)}
+.ll-s{font-weight:300;font-style:normal;letter-spacing:.005em}
+.ll-bg{font-weight:700;letter-spacing:-.05em}
+.logo{font-weight:600;letter-spacing:-.025em}
+.logo em{font-weight:300;font-style:normal}
+
+/* Page-level titles — bold geometric */
+.sh-t{font-weight:700;letter-spacing:-.045em}
+.sh-t em{font-weight:300;font-style:normal;color:var(--gd)}
+.dh-nm{font-weight:700;letter-spacing:-.03em;line-height:1.05}
+.mt{font-weight:600;letter-spacing:-.025em}
+.set-t{font-weight:600;letter-spacing:-.02em}
+.log-card-t{font-weight:600;letter-spacing:-.03em}
+.sp-title{font-weight:600;letter-spacing:-.025em}
+.scard-t{font-weight:600;letter-spacing:-.015em}
+.lr-t{font-weight:600;letter-spacing:-.02em}
+
+/* Item names — medium with tight tracking */
+.hi-nm{font-weight:500;letter-spacing:-.005em}
+.hi.done .hi-nm{font-weight:400}
+.le-nm{font-weight:500;letter-spacing:-.005em}
+.popup-name{font-weight:600;letter-spacing:-.012em}
+.comp-date{font-weight:600;letter-spacing:-.01em}
+.route-card-name{font-weight:600;letter-spacing:-.005em}
+.rp-name{font-weight:600;letter-spacing:-.005em}
+.empty-state p{font-weight:400;font-style:normal;letter-spacing:.005em}
+
+/* Notes / quotes — italic earned its place here */
+.comp-notes{font-style:italic;font-weight:400}
+.av-info{font-style:normal;font-weight:400;color:var(--ink3)}
+.lr-s{font-style:normal;font-weight:400}
+.set-s{font-style:normal;font-weight:400}
+.ms{font-style:normal;font-weight:400}
+
+/* Numbers / mono-equivalents — medium weight + tabular */
+.sh-v{font-weight:500;letter-spacing:-.025em}
+.dsb-v{font-weight:600;letter-spacing:-.015em}
+.le-n{font-weight:500;letter-spacing:.04em;font-style:normal}
+.le-el{font-weight:600;letter-spacing:-.005em}
+.le-dt{font-weight:500;letter-spacing:.08em}
+.hi-sub{font-weight:400;letter-spacing:.005em}
+.hi-cnt{font-weight:500;letter-spacing:.02em}
+.sp-cnt{font-weight:500;letter-spacing:.02em}
+.bn{font-weight:600;letter-spacing:-.005em}
+.comp-time{font-weight:500;letter-spacing:.02em}
+.route-card-meta{font-weight:400;letter-spacing:.005em}
+.rp-meta{font-weight:400;letter-spacing:.01em}
+.log-card-cnt{font-weight:500;letter-spacing:.005em}
+.popup-meta{font-weight:500;letter-spacing:.005em}
+
+/* Eyebrows / labels — semibold + wide tracking + uppercase */
+.eyebrow,.sp-eye,.sh-eye,.ll-eye,.lbl,.fl,.ib-l,.lg-t,.upz-t,.dsb-l,.sh,.blbl,.vis-toggle,.dh-loc,.comp-route-name,.dh-edit-btn,.popup-route,.popup-done,.popup-pending,.rca-btn,.rca-add,.db,.lnote,.comp-edit-btn,.comp-del-btn{font-weight:600;letter-spacing:.14em}
+.dh-loc{font-weight:500;letter-spacing:.16em}
+.sh{font-weight:600;letter-spacing:.2em}
+.lg-t,.sp-eye,.sh-eye,.ll-eye{font-weight:600;letter-spacing:.22em}
+.upz-t,.dsb-l,.popup-route,.popup-done,.popup-pending,.comp-route-name{font-weight:600;letter-spacing:.16em}
+.lbl,.fl,.ib-l,.lnote{font-weight:500;letter-spacing:.18em}
+.vis-toggle{font-weight:500;letter-spacing:.14em}
+.db{font-weight:600;letter-spacing:.14em}
+.rca-btn,.rca-add{font-weight:600;letter-spacing:.12em}
+.comp-edit-btn,.comp-del-btn{font-weight:600;letter-spacing:.12em}
+.dh-edit-btn{font-weight:600;letter-spacing:.14em}
+
+/* Buttons — medium weight, slight tracking */
+.lbtn,.ssave,.slo,.mok,.mcan,.bp,.bs,.bd,.add-btn{font-weight:500;letter-spacing:.005em}
+.bp{font-weight:500}
+.dt-btn{font-weight:500;letter-spacing:.01em}
+
+/* Chips — medium */
+.fc,.stat-fc{font-weight:500;letter-spacing:.005em}
+.fc.on,.stat-fc.on{font-weight:600}
+
+/* Header nav — medium */
+.nb,.uname,.av{font-weight:500}
+.av{letter-spacing:.04em}
+
+/* Misc */
+.coord-hint{font-weight:400;letter-spacing:.01em}
+.toast{font-weight:500;letter-spacing:.005em}
+.comp-stars{letter-spacing:3px}
 </style>
 </head>
 <body>
