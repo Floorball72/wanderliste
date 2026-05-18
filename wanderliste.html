@@ -385,6 +385,88 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
 .leaflet-popup-content{margin:0!important;font-family:'Montserrat',sans-serif!important}
 .leaflet-popup-tip{box-shadow:var(--shadow)}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(74,144,217,.4)}50%{box-shadow:0 0 0 8px rgba(74,144,217,0)}}
+
+/* ── MOBILE RESPONSIVE ── */
+@media(max-width:600px){
+  /* Detail panel: slide up from bottom as sheet */
+  #det{right:0;left:0;top:auto;bottom:0;width:100%;height:90vh;z-index:350;border-radius:var(--r-xl) var(--r-xl) 0 0;box-shadow:0 -8px 40px rgba(15,14,11,.18);overflow-y:auto}
+  #det.on{display:flex}
+  /* Drag handle indicator */
+  #det::before{content:'';display:block;width:36px;height:4px;background:var(--line2);border-radius:2px;margin:10px auto -4px;flex-shrink:0}
+  .dh{height:180px;border-radius:var(--r-xl) var(--r-xl) 0 0;overflow:hidden}
+  .dh-nm{font-size:18px}
+
+  /* Stats layout */
+  .si{padding:16px 12px}
+  .stat-hero{padding:20px 16px;margin-bottom:14px}
+  .sh-t{font-size:22px;margin-bottom:18px}
+  .sh-grid{grid-template-columns:repeat(3,1fr);gap:12px 10px}
+  .sh-v{font-size:26px}
+  .stat-cards{grid-template-columns:1fr;gap:10px;margin-bottom:10px}
+  .scard{padding:16px}
+  .log-card-head{padding:14px 16px}
+  .le{gap:8px;padding:10px 14px}
+  .le-nm{font-size:12px}
+  .le-el{display:none}
+
+  /* Detail stats grid */
+  .dstats{grid-template-columns:repeat(2,1fr)}
+
+  /* Modals: full-width bottom sheet on mobile */
+  .mbg{padding:0;align-items:flex-end}
+  .modal{border-radius:var(--r-xl) var(--r-xl) 0 0;width:100%;max-height:92vh;padding:20px 18px 32px}
+  .modal::before{content:'';display:block;width:36px;height:4px;background:var(--line2);border-radius:2px;margin:-8px auto 16px}
+  .modal.wide{width:100%}
+  .mt{font-size:16px}
+  .fg{grid-template-columns:1fr}
+  .fg .full{grid-column:1}
+  .time-row{grid-template-columns:1fr 1fr}
+
+  /* Header adjustments */
+  .hbtn{width:30px;height:30px}
+  /* Hide less critical header buttons on very small screens */
+  #leg-btn{display:none}
+
+  /* Map overlays: move up a bit on mobile so not hidden behind mob-list-btn */
+  #map-overlays{bottom:80px}
+
+  /* Settings */
+  #settings-view{padding:16px 12px}
+  .setc{padding:18px 16px}
+  .av-upload{flex-direction:column;align-items:flex-start;gap:12px}
+
+  /* Draw toolbar: full width on mobile */
+  #draw-toolbar{left:10px;right:10px;transform:none;flex-wrap:wrap;gap:7px;justify-content:space-between}
+  #draw-toolbar .dh{flex:0 0 100%}
+
+  /* Filter chips: scrollable row */
+  .frow{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;scrollbar-width:none}
+  .frow::-webkit-scrollbar{display:none}
+
+  /* Log entries: hide elevation on mobile */
+  .le-dt:not(:last-child){display:none}
+
+  /* Info grid in detail: full width */
+  .info-grid{grid-template-columns:1fr}
+}
+
+/* Slightly larger phones / small tablets */
+@media(max-width:900px) and (min-width:601px){
+  .si{padding:20px 16px}
+  .stat-hero{padding:24px 20px}
+  .sh-grid{grid-template-columns:repeat(3,1fr)}
+  .info-grid{grid-template-columns:1fr 1fr}
+  .dstats{grid-template-columns:repeat(4,1fr)}
+  .mbg{padding:16px}
+  .modal{width:min(480px,100%)}
+}
+
+/* Ensure tap targets are large enough */
+@media(hover:none){
+  .fc,.stat-fc,.nb,.hbtn,.moc,.rca-btn,.comp-edit-btn,.comp-del-btn{min-height:36px;display:flex;align-items:center;justify-content:center}
+  .nb{padding:6px 10px}
+  .mth-del{opacity:1}
+}
 </style>
 </head>
 <body>
@@ -393,12 +475,12 @@ header{height:var(--hdr);background:var(--ink);display:flex;align-items:center;p
 
 <div id="login">
   <div class="ll">
-    <div class="ll-bg">ALPEN</div>
+    <div class="ll-bg">SWISS</br>ALPEN</div>
     <div class="ll-c">
       <div class="ll-eye">Private Wanderliste</div>
       <div class="ll-h">Unsere<br><em>Berge</em>,<br>unsere Touren.</div>
       <div class="ll-hr"></div>
-      <div class="ll-s">Jede Wanderung, jeder Gipfel — für uns zwei.</div>
+      <div class="ll-s">Immanuel & Jerome</div>
     </div>
   </div>
   <div class="lr">
